@@ -1,0 +1,25 @@
+digraph dag {
+"completion_score" -> "driving_score";
+"carla_version" -> "simulation_time";
+"carla_version" -> "system_time";
+"route_length" -> "simulation_time";
+"route_length" -> "infraction";
+"route_length" -> "outside_route_lanes";
+"simulation_time" -> "system_time";
+"npc_vehicles" -> "simulation_time";
+"npc_vehicles" -> "system_time";
+"npc_vehicles" -> "infraction";
+"npc_vehicles" -> "outside_route_lanes";
+"ego_vehicle" -> "infraction";
+"ego_vehicle" -> "outside_route_lanes";
+"weather" -> "infraction";
+"weather" -> "outside_route_lanes";
+"infraction" -> "completion_score";
+"infraction" -> "driving_score";
+"outside_route_lanes" -> "driving_score";
+"infraction" -> "simulation_time";
+"pedestrians" -> "simulation_time";
+"pedestrians" -> "system_time";
+"pedestrians" -> "infraction";
+"pedestrians" -> "outside_route_lanes";
+}
