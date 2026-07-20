@@ -1,7 +1,7 @@
 ALPHA:0.01 | SEED:10
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -10,8 +10,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:20
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -20,8 +20,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:30
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -30,8 +30,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:40
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -40,8 +40,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:50
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -50,8 +50,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:60
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -60,8 +60,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:70
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -70,8 +70,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:80
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -80,8 +80,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:90
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -90,8 +90,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:100
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -100,8 +100,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:110
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -110,8 +110,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:120
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -120,8 +120,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:130
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -130,8 +130,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:140
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -140,8 +140,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:150
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -150,8 +150,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:160
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -160,8 +160,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:170
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -170,8 +170,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:180
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -180,8 +180,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:190
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -190,8 +190,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:200
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -200,8 +200,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:210
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -210,8 +210,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:220
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -220,8 +220,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:230
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -230,8 +230,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:240
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -240,8 +240,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:250
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -250,8 +250,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:260
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -260,8 +260,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:270
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -270,8 +270,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:280
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -280,8 +280,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:290
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -290,8 +290,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.01 | SEED:300
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8667
-Directed Precision: 0.6000
+Directed Specificity: 0.8333
+Directed Precision: 0.5455
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5000
 Undirected Specificity: 0.5556
@@ -300,8 +300,8 @@ Undirected Recall: 0.5000
 ----------------------------------------
 ALPHA:0.05 | SEED:10
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -310,8 +310,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:20
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -320,8 +320,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:30
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -330,8 +330,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:40
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -340,8 +340,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:50
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -350,8 +350,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:60
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -360,8 +360,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:70
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -370,8 +370,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:80
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -380,8 +380,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:90
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -390,8 +390,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:100
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -400,8 +400,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:110
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -410,8 +410,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:120
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -420,8 +420,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:130
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -430,8 +430,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:140
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -440,8 +440,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:150
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -450,8 +450,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:160
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -460,8 +460,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:170
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -470,8 +470,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:180
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -480,8 +480,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:190
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -490,8 +490,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:200
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -500,8 +500,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:210
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -510,8 +510,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:220
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -520,8 +520,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:230
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -530,8 +530,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:240
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -540,8 +540,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:250
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -550,8 +550,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:260
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -560,8 +560,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:270
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -570,8 +570,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:280
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -580,8 +580,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:290
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -590,8 +590,8 @@ Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.05 | SEED:300
 Directed Sensitivity: 0.5000
-Directed Specificity: 0.8333
-Directed Precision: 0.5455
+Directed Specificity: 0.8000
+Directed Precision: 0.5000
 Directed Recall: 0.5000
 Undirected Sensitivity: 0.5833
 Undirected Specificity: 0.5556
@@ -599,300 +599,300 @@ Undirected Precision: 0.6364
 Undirected Recall: 0.5833
 ----------------------------------------
 ALPHA:0.1 | SEED:10
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:20
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:30
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:40
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:50
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:60
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:70
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:80
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:90
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:100
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:110
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:120
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:130
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:140
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:150
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:160
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:170
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:180
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:190
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:200
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:210
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:220
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:230
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:240
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:250
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:260
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:270
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:280
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:290
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
 Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.1 | SEED:300
-Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
-Directed Recall: 0.4167
+Directed Sensitivity: 0.3333
+Directed Specificity: 0.7000
+Directed Precision: 0.3077
+Directed Recall: 0.3333
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
 Undirected Precision: 0.6667
@@ -900,8 +900,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:10
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -910,8 +910,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:20
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -920,8 +920,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:30
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -930,8 +930,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:40
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -940,8 +940,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:50
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -950,8 +950,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:60
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -960,8 +960,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:70
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -970,8 +970,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:80
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -980,8 +980,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:90
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -990,8 +990,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:100
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1000,8 +1000,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:110
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1010,8 +1010,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:120
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1020,8 +1020,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:130
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1030,8 +1030,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:140
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1040,8 +1040,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:150
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1050,8 +1050,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:160
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1060,8 +1060,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:170
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1070,8 +1070,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:180
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1080,8 +1080,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:190
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1090,8 +1090,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:200
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1100,8 +1100,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:210
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1110,8 +1110,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:220
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1120,8 +1120,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:230
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1130,8 +1130,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:240
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1140,8 +1140,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:250
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1150,8 +1150,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:260
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1160,8 +1160,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:270
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1170,8 +1170,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:280
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1180,8 +1180,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:290
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
@@ -1190,8 +1190,8 @@ Undirected Recall: 0.6667
 ----------------------------------------
 ALPHA:0.2 | SEED:300
 Directed Sensitivity: 0.4167
-Directed Specificity: 0.7667
-Directed Precision: 0.4167
+Directed Specificity: 0.7333
+Directed Precision: 0.3846
 Directed Recall: 0.4167
 Undirected Sensitivity: 0.6667
 Undirected Specificity: 0.5556
