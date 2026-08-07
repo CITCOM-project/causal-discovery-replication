@@ -2,6 +2,7 @@
 name="causal_discovery_replication"
 requires-python=">=3.12"
 dependencies = [
-    "causal_testing_framework @ git+https://github.com/CITCOM-project/CausalTestingFramework@22429e6dd7463ce65a7563fc9fdaf4c1df4b7998"
+    "causal_testing_framework @ git+https://github.com/CITCOM-project/CausalTestingFramework@22429e6dd7463ce65a7563fc9fdaf4c1df4b7998",
+    "pgmpy>=1.1.2",
 ]
 dynamic=["version"]
