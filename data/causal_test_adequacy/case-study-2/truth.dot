@@ -1,0 +1,8 @@
+digraph dag {
+    pop_size -> contacts;
+    location -> contacts;
+    location -> susceptibility;
+    contacts -> cum_infections;
+    susceptibility -> cum_infections;
+    pop_size -> cum_infections;
+}
