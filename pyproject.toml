@@ -6,3 +6,12 @@ dependencies = [
     "pgmpy>=1.1.2",
 ]
 dynamic=["version"]
+
+[tool.black]
+# https://github.com/psf/black
+line-length = 120
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 120

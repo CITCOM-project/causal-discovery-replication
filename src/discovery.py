@@ -16,8 +16,7 @@ import warnings
 warnings.filterwarnings("ignore")  # Hide warnings
 
 
-def setup_domain_knowledge(reference_dag_path: str, expert_knowledge_amount: float):
-    reference_dag = nx.nx_pydot.read_dot(reference_dag_path)
+def setup_domain_knowledge(reference_dag: CausalDAG, expert_knowledge_amount: float):
     required_edges = set(reference_dag.edges())
     forbidden_edges = set(nx.non_edges(reference_dag))
     total_edges = len(required_edges) + len(forbidden_edges)
@@ -102,12 +101,13 @@ def run_ctf_discovery(
         df=df,
         exclude_edges=expert_knowledge.forbidden_edges if expert_knowledge else None,
         include_edges=expert_knowledge.required_edges if expert_knowledge else None,
+        random_seed=start_time,
         **kwargs,
     )
     dag = discover.discover()
     end_time = time()
 
-    dag.graph["graph"] = {"time": end_time - start_time}
+    dag.graph["graph"] = {"time": end_time - start_time, "seed": start_time}
 
     # post-processing removal
     if context and "file_index" in dag.nodes():
@@ -130,7 +130,7 @@ def parse_args():
         default=False,
         help="Whether to include a 'context' column to store the source file.",
     )
-    parser.add_argument("-r", "--reference-dag", help="Path to reference (ground truth) dag.")
+    parser.add_argument("-r", "--reference-dag", help="Path to reference (ground truth) dag.", required=True)
     parser.add_argument(
         "-e",
         "--expert-knowledge-amount",
@@ -160,6 +160,21 @@ def evaluate_dag(dag: nx.DiGraph, df: pd.DataFrame):
     return Counter([test.result.outcome for test in framework.test_cases])
 
 
+def dag_confusion_matrix(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
+
+    true = set(reference_dag.edges())
+    false = set(nx.non_edges(reference_dag))
+    positives = set(inferred_dag.edges())
+    negatives = set(nx.non_edges(inferred_dag))
+
+    return {
+        "true_positives": true.intersection(positives),
+        "false_positives": false.intersection(positives),
+        "true_negatives": true.intersection(negatives),
+        "false_negatives": false.intersection(negatives),
+    }
+
+
 if __name__ == "__main__":
     args = parse_args()
 
@@ -175,8 +190,10 @@ if __name__ == "__main__":
     technique = techniques[args.technique]
 
     data = load_data(args.data, context=args.context, variables=args.variables, data_amount=args.data_amount)
+    reference_dag = CausalDAG(args.reference_dag)
+    data = data[list(reference_dag.nodes())]
     expert_knowledge = (
-        setup_domain_knowledge(args.reference_dag, args.expert_knowledge_amount)
+        setup_domain_knowledge(reference_dag, args.expert_knowledge_amount)
         if args.reference_dag and args.expert_knowledge_amount
         else None
     )
@@ -196,15 +213,35 @@ if __name__ == "__main__":
                 expert_knowledge=expert_knowledge,
                 context=args.context,
             )
-        inferred_dag.graph["graph"] |= {
-            "expert_knowledge_amount": args.expert_knowledge_amount,
-            "data_points": len(data),
-            "required_edges": len(expert_knowledge.required_edges) if expert_knowledge else 0,
-            "forbidden_edges": len(expert_knowledge.forbidden_edges) if expert_knowledge else 0,
-            "pass": 0,
-            "fail": 0,
-            "inestimable": 0,
-        } | {k.name.lower(): v for k, v in evaluate_dag(inferred_dag, data).items()}
+
+        inferred_dag.graph["graph"] |= (
+            {
+                "expert_knowledge_amount": args.expert_knowledge_amount,
+                "data_points": len(data),
+                "required_edges": len(expert_knowledge.required_edges) if expert_knowledge else 0,
+                "forbidden_edges": len(expert_knowledge.forbidden_edges) if expert_knowledge else 0,
+                "pass": 0,
+                "fail": 0,
+                "inestimable": 0,
+            }
+            | {k.name.lower(): v for k, v in evaluate_dag(inferred_dag, data).items()}
+            | {
+                f"directional_{key}": len(value)
+                for key, value in dag_confusion_matrix(reference_dag, inferred_dag).items()
+            }
+            | {
+                f"non_directional_{key}": len(value)
+                for key, value in dag_confusion_matrix(
+                    reference_dag.to_undirected(), inferred_dag.to_undirected()
+                ).items()
+            }
+            | {
+                "true_edges": len(reference_dag.edges),
+                "inferred_edges": len(inferred_dag.edges),
+                "true_non_edges": len(list(nx.non_edges(reference_dag))),
+                "inferred_non_edges": len(list(nx.non_edges(inferred_dag))),
+            }
+        )
 
     except ValueError as e:
         inferred_dag = nx.DiGraph()

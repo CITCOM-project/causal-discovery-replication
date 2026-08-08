@@ -10,7 +10,7 @@ do
             do
                 for technique in "NSGADiscovery" "HillClimberDiscovery" "HillClimbSearch" "PC" "GES"
                 do
-                    python src/discovery.py -d ${data_file} -o "results/${root}/technique-${technique}/knowledge-0/data-${data}/seed-${seed}.dot" -t ${technique} -D ${data}
+                    python src/discovery.py -d ${data_file} -o "results/${root}/technique-${technique}/knowledge-0/data-${data}/seed-${seed}.dot" -t ${technique} -D ${data} -r ${ground_truth}
                     if [ "$technique" != "GES" ]; then # Skip for GES as expert knowledge isn't supported
                         for knowledge in 0.2 0.4 0.6 0.8
                         do
