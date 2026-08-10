@@ -1,17 +1,18 @@
 import argparse
-import pandas as pd
-import networkx as nx
-from pgmpy.causal_discovery import HillClimbSearch, ExpertKnowledge, PC, GES
-from time import time
-from causal_testing.causal_testing_framework import CausalTestingFramework
-from causal_testing.specification.causal_dag import CausalDAG
-from collections import Counter
-import random  # no point seeding random since we can't seed the causal discovery techniques
 import os
+import random  # no point seeding random since we can't seed the causal discovery techniques
+import warnings
+from collections import Counter
+from time import time
+
+import networkx as nx
+import pandas as pd
+from causal_testing.causal_testing_framework import CausalTestingFramework
+from causal_testing.discovery.abstract_discovery import Discovery
 from causal_testing.discovery.hill_climber_discovery import HillClimberDiscovery
 from causal_testing.discovery.nsga_discovery import NSGADiscovery
-from causal_testing.discovery.abstract_discovery import Discovery
-import warnings
+from causal_testing.specification.causal_dag import CausalDAG
+from pgmpy.causal_discovery import GES, PC, ExpertKnowledge, HillClimbSearch
 
 warnings.filterwarnings("ignore")  # Hide warnings
 
