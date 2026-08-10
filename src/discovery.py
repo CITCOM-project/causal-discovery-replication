@@ -49,10 +49,6 @@ def load_data(data_path: str, context: bool = False, variables: list[str] = None
         if variables:
             df = df[variables]
 
-    # clean data
-    # df = df.replace([np.inf, -np.inf], np.nan)
-    # df = df.dropna()
-
     # Drop unnamed columns
     unnamed_columns = [c for c in df.columns if c.startswith("Unnamed: ")]
     df = df.drop(unnamed_columns, axis=1)
@@ -62,12 +58,6 @@ def load_data(data_path: str, context: bool = False, variables: list[str] = None
     for col in cat_cols:
         df[col] = df[col].astype("category").cat.codes
 
-    # remove zero-variance columns
-    # variances = df.var()
-    # constant_cols = variances[variances == 0].index
-    # if len(constant_cols) > 0:
-    #     print(f"Warning: Dropping constant columns due to zero variance: {list(constant_cols)}")
-    #     df = df.drop(columns=constant_cols)
     return df.sample(frac=data_amount)
 
 
@@ -158,7 +148,10 @@ def evaluate_dag(dag: nx.DiGraph, df: pd.DataFrame):
     framework = CausalTestingFramework(dag=causal_dag, df=df, test_cases=causal_dag.generate_causal_tests())
     framework.run_tests(silent=True)
 
-    return Counter([test.result.outcome for test in framework.test_cases])
+    return {
+        k: v / len(framework.test_cases)
+        for k, v in Counter([test.result.outcome for test in framework.test_cases]).items()
+    }
 
 
 def dag_confusion_matrix(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
@@ -192,6 +185,11 @@ if __name__ == "__main__":
 
     data = load_data(args.data, context=args.context, variables=args.variables, data_amount=args.data_amount)
     reference_dag = CausalDAG(args.reference_dag)
+
+    assert all(
+        node in data for node in reference_dag.nodes()
+    ), f"Nodes {[node for node in reference_dag.nodes() if node not in data]} not in data"
+
     data = data[list(reference_dag.nodes())]
     expert_knowledge = (
         setup_domain_knowledge(reference_dag, args.expert_knowledge_amount)
@@ -215,38 +213,40 @@ if __name__ == "__main__":
                 context=args.context,
             )
 
-        inferred_dag.graph["graph"] |= (
-            {
-                "expert_knowledge_amount": args.expert_knowledge_amount,
-                "data_points": len(data),
-                "required_edges": len(expert_knowledge.required_edges) if expert_knowledge else 0,
-                "forbidden_edges": len(expert_knowledge.forbidden_edges) if expert_knowledge else 0,
-                "pass": 0,
-                "fail": 0,
-                "inestimable": 0,
-            }
-            | {k.name.lower(): v for k, v in evaluate_dag(inferred_dag, data).items()}
-            | {
-                f"directional_{key}": len(value)
-                for key, value in dag_confusion_matrix(reference_dag, inferred_dag).items()
-            }
-            | {
-                f"non_directional_{key}": len(value)
-                for key, value in dag_confusion_matrix(
-                    reference_dag.to_undirected(), inferred_dag.to_undirected()
-                ).items()
-            }
-            | {
-                "true_edges": len(reference_dag.edges),
-                "inferred_edges": len(inferred_dag.edges),
-                "true_non_edges": len(list(nx.non_edges(reference_dag))),
-                "inferred_non_edges": len(list(nx.non_edges(inferred_dag))),
-            }
-        )
-
     except ValueError as e:
         inferred_dag = nx.DiGraph()
         inferred_dag.graph["graph"] = {"error": str(e)}
+
+    inferred_dag.graph["graph"] |= (
+        {
+            "technique": args.technique,
+            "expert_knowledge_amount": args.expert_knowledge_amount,
+            "data_points": len(data),
+            "required_edges": len(expert_knowledge.required_edges) if expert_knowledge else 0,
+            "forbidden_edges": len(expert_knowledge.forbidden_edges) if expert_knowledge else 0,
+            "pass": 0,
+            "fail": 0,
+            "inestimable": 0,
+        }
+        | {f"directional_{key}": len(value) for key, value in dag_confusion_matrix(reference_dag, inferred_dag).items()}
+        | {
+            f"non_directional_{key}": len(value)
+            for key, value in dag_confusion_matrix(reference_dag.to_undirected(), inferred_dag.to_undirected()).items()
+        }
+        | {
+            "true_edges": len(reference_dag.edges),
+            "inferred_edges": len(inferred_dag.edges),
+            "true_non_edges": len(list(nx.non_edges(reference_dag))),
+            "inferred_non_edges": len(list(nx.non_edges(inferred_dag))),
+        }
+    )
+    try:
+        # Do this as a separate step in case the DAG is cyclic
+        inferred_dag.graph["graph"] |= {k.name.lower(): v for k, v in evaluate_dag(inferred_dag, data).items()}
+
+    except (nx.HasACycle, ValueError) as e:
+        if "error" not in inferred_dag.graph["graph"]:
+            inferred_dag.graph["graph"] = {"error": str(e)}
 
     # output
     root, _ = os.path.split(args.output)
