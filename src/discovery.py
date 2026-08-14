@@ -15,6 +15,13 @@ from pgmpy.causal_discovery import GES, PC, ExpertKnowledge, HillClimbSearch
 
 warnings.filterwarnings("ignore")  # Hide warnings
 
+techniques = {
+    "PC": PC,
+    "GES": GES,
+    "HillClimbSearch": HillClimbSearch,
+    "HillClimberDiscovery": HillClimberDiscovery,
+}
+
 
 def setup_domain_knowledge(reference_dag: CausalDAG, expert_knowledge_amount: float):
     required_edges = set(reference_dag.edges())
@@ -165,12 +172,6 @@ def dag_confusion_matrix(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
 if __name__ == "__main__":
     args = parse_args()
 
-    techniques = {
-        "PC": PC,
-        "GES": GES,
-        "HillClimbSearch": HillClimbSearch,
-        "HillClimberDiscovery": HillClimberDiscovery,
-    }
     if args.technique not in techniques:
         raise ValueError(f"Unsupported technique {args.technique}. Must be one of {list(techniques)}.")
     technique = techniques[args.technique]
