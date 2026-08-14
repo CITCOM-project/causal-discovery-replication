@@ -10,7 +10,6 @@ import pandas as pd
 from causal_testing.causal_testing_framework import CausalTestingFramework
 from causal_testing.discovery.abstract_discovery import Discovery
 from causal_testing.discovery.hill_climber_discovery import HillClimberDiscovery
-from causal_testing.discovery.nsga_discovery import NSGADiscovery
 from causal_testing.specification.causal_dag import CausalDAG
 from pgmpy.causal_discovery import GES, PC, ExpertKnowledge, HillClimbSearch
 
@@ -52,11 +51,12 @@ def load_data(data_path: str, context: bool = False, variables: list[str] = None
     # Drop unnamed columns
     unnamed_columns = [c for c in df.columns if c.startswith("Unnamed: ")]
     df = df.drop(unnamed_columns, axis=1)
+    assert not df.isnull().any().any(), "Cannot cope with null values"
 
     # encode categoricals
     cat_cols = df.select_dtypes(include=["object", "string"]).columns
     for col in cat_cols:
-        df[col] = df[col].astype("category").cat.codes
+        df[col] = df[col].astype("category")
 
     return df.sample(frac=data_amount)
 
@@ -131,13 +131,6 @@ def parse_args():
     parser.add_argument(
         "-D", "--data-amount", type=float, help="The proportion of the data to use. (Between 0 and 1)", default=1
     )
-    parser.add_argument(
-        "-V",
-        "--variables",
-        help="The subset of variables from the data to consider. Defaults to all.",
-        nargs="*",
-        default=[],
-    )
     return parser.parse_args()
 
 
@@ -176,21 +169,22 @@ if __name__ == "__main__":
         "PC": PC,
         "GES": GES,
         "HillClimbSearch": HillClimbSearch,
-        "NSGADiscovery": NSGADiscovery,
         "HillClimberDiscovery": HillClimberDiscovery,
     }
     if args.technique not in techniques:
         raise ValueError(f"Unsupported technique {args.technique}. Must be one of {list(techniques)}.")
     technique = techniques[args.technique]
 
-    data = load_data(args.data, context=args.context, variables=args.variables, data_amount=args.data_amount)
     reference_dag = CausalDAG(args.reference_dag)
 
-    assert all(
-        node in data for node in reference_dag.nodes()
-    ), f"Nodes {[node for node in reference_dag.nodes() if node not in data]} not in data"
+    data = load_data(
+        args.data,
+        context=args.context,
+        variables=list(reference_dag.nodes()),
+        data_amount=args.data_amount,
+    )
+    print(data.dtypes)
 
-    data = data[list(reference_dag.nodes())]
     expert_knowledge = (
         setup_domain_knowledge(reference_dag, args.expert_knowledge_amount)
         if args.reference_dag and args.expert_knowledge_amount
