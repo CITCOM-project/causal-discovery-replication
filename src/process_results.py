@@ -1,34 +1,51 @@
 import os
 from glob import glob
 from itertools import takewhile
+from multiprocessing import Pool
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import pydot
+from causal_testing.specification.causal_dag import CausalDAG
 from tqdm import tqdm
 
 plt.style.use("ggplot")
+
+
+def read_file(dag_path):
+    split = os.path.normpath(os.path.splitext(dag_path)[0]).split(os.sep)
+    system = list(takewhile(lambda directory: not directory.startswith("technique-"), split))
+    dag = pydot.graph_from_dot_file(dag_path)[0]
+    try:
+        configuration = dict(map(lambda directory: directory.split("-"), split[len(system) :]))
+    except ValueError:
+        pass
+    configuration = {
+        k: float(v) if k not in ["technique", "error"] else v for k, v in (configuration | dag.get_attributes()).items()
+    }
+    configuration["system"] = system
+    configuration["dag_path"] = dag_path
+
+    # Temp hack to normalise test_outcomes
+    causal_dag = CausalDAG(dag_path, ignore_cycles=True)
+    try:
+        causal_dag.datatypes = {node: float for node in causal_dag.nodes}
+        num_tests = len(causal_dag.generate_causal_tests())
+        if num_tests:
+            configuration["pass"] = configuration.get("pass", 0) / num_tests
+            configuration["fail"] = configuration.get("fail", 0) / num_tests
+            configuration["inestimable"] = configuration.get("inestimable", 0) / num_tests
+    except ValueError as e:
+        pass
+    return configuration
 
 
 def read_data(data_path: str = None) -> pd.DataFrame:
     if data_path and os.path.exists(data_path):
         data = pd.read_csv(data_path, index_col=0)
     else:
-        data = []
-        for dag_path in tqdm(glob("results/**/*.dot", recursive=True)):
-            split = os.path.normpath(os.path.splitext(dag_path)[0]).split(os.sep)
-            system = list(takewhile(lambda directory: not directory.startswith("technique-"), split))
-            dag = pydot.graph_from_dot_file(dag_path)[0]
-            try:
-                configuration = dict(map(lambda directory: directory.split("-"), split[len(system) :]))
-            except ValueError:
-                print(dag_path)
-                continue
-            configuration = {k: float(v) if k != "technique" else v for k, v in configuration.items()}
-            configuration["system"] = system
-            configuration |= dag.get_attributes()
-            configuration["dag_path"] = dag_path
-            data.append(configuration)
+        with Pool() as pool:
+            data = pool.map(read_file, tqdm(glob("results/**/*.dot", recursive=True)))
         data = pd.DataFrame(data)
         if data_path:
             data.to_csv(data_path)
