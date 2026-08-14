@@ -115,8 +115,7 @@ def construct_statement_stack_from_dag(causal_dag: nx.DiGraph):
                        generated.
     :return: A list of strings representing statements that can be executed in python.
     """
-    nodes_ordered_for_traversal = sorted([node for node in causal_dag.nodes if "Y" in node])
-    nodes_ordered_for_traversal.reverse()
+    nodes_ordered_for_traversal = reversed([node for node in nx.topological_sort(causal_dag) if "Y" in node])
     statement_stack = []
 
     for output_node in nodes_ordered_for_traversal:
