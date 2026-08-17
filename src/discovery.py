@@ -6,6 +6,7 @@ from collections import Counter
 from time import time
 
 import networkx as nx
+import numpy as np
 import pandas as pd
 from causal_testing.causal_testing_framework import CausalTestingFramework
 from causal_testing.discovery.abstract_discovery import Discovery
@@ -58,7 +59,11 @@ def load_data(data_path: str, context: bool = False, variables: list[str] = None
     # Drop unnamed columns
     unnamed_columns = [c for c in df.columns if c.startswith("Unnamed: ")]
     df = df.drop(unnamed_columns, axis=1)
-    assert not df.isnull().any().any(), "Cannot cope with null values"
+
+    assert not df.isna().any().any(), "Dataset cannot contain NaN values"
+    assert not np.isinf(df.to_numpy()).any(), "Dataset cannot contain Inf values"
+    constant_cols = [col for col in df.columns if df[col].nunique() <= 1]
+    assert not constant_cols, f"Columns {constant_cols} were constant."
 
     # encode categoricals
     cat_cols = df.select_dtypes(include=["object", "string"]).columns
@@ -184,7 +189,6 @@ if __name__ == "__main__":
         variables=list(reference_dag.nodes()),
         data_amount=args.data_amount,
     )
-    print(data.dtypes)
 
     expert_knowledge = (
         setup_domain_knowledge(reference_dag, args.expert_knowledge_amount)
