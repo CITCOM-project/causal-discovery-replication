@@ -105,6 +105,7 @@ def run_ctf_discovery(
         exclude_edges=expert_knowledge.forbidden_edges if expert_knowledge else None,
         include_edges=expert_knowledge.required_edges if expert_knowledge else None,
         random_seed=start_time,
+        alpha=0.01,
         **kwargs,
     )
     dag = discover.discover()
