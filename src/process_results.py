@@ -69,8 +69,10 @@ def read_data(data_path: str = None) -> pd.DataFrame:
 
 def plot_accuracy(df: pd.DataFrame, column: str):
     _, ax = plt.subplots()
-    ax.boxplot(df.loc[~df[column].isnull()].groupby("technique")[column].apply(list))
-    ax.set_xticklabels(df.groupby("technique").groups.keys())
+    ax.boxplot(
+        df.loc[~df[column].isnull()].groupby("technique")[column].apply(list),
+        tick_labels=df.loc[~df[column].isnull()].groupby("technique").groups.keys(),
+    )
     ax.tick_params("x", rotation=45, rotation_mode="xtick")
     ax.set_title(column.capitalize())
     ax.set_ylim(0, 1)
