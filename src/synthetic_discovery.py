@@ -6,10 +6,10 @@ from causal_testing.discovery.abstract_discovery import Discovery
 
 from discovery import (
     dag_confusion_matrix,
+    dag_difference_metrics,
     evaluate_dag,
-    run_baseline_discovery,
+    run_causal_learn_discovery,
     run_ctf_discovery,
-    setup_domain_knowledge,
     techniques,
 )
 from program_generation import dag_and_data
@@ -60,35 +60,20 @@ if __name__ == "__main__":
         seed=args.seed,
     )
 
-    expert_knowledge = (
-        setup_domain_knowledge(reference_dag, args.expert_knowledge_amount) if args.technique != "GES" else None
-    )
-
     try:
-        if issubclass(technique, Discovery):
-            inferred_dag = run_ctf_discovery(
-                technique,
-                df=data,
-                expert_knowledge=expert_knowledge,
-            )
+        if args.technique in ["pc", "ges", "grasp"]:
+            inferred_dag = run_causal_learn_discovery(technique=technique, df=data)
         else:
-            inferred_dag = run_baseline_discovery(
-                technique,
-                df=data,
-                expert_knowledge=expert_knowledge,
-            )
+            inferred_dag = run_ctf_discovery(technique, df=data, random_seed=args.seed)
 
     except ValueError as e:
         inferred_dag = nx.DiGraph()
+        inferred_dag.add_nodes_from(reference_dag.nodes)
         inferred_dag.graph["graph"] = {"error": str(e)}
 
     inferred_dag.graph["graph"] |= (
-        {
-            "technique": args.technique,
-            "expert_knowledge_amount": args.expert_knowledge_amount,
-            "data_points": len(data),
-            "required_edges": len(expert_knowledge.required_edges) if expert_knowledge else 0,
-            "forbidden_edges": len(expert_knowledge.forbidden_edges) if expert_knowledge else 0,
+        vars(args)
+        | {
             "pass": 0,
             "fail": 0,
             "inestimable": 0,
@@ -98,12 +83,7 @@ if __name__ == "__main__":
             f"non_directional_{key}": len(value)
             for key, value in dag_confusion_matrix(reference_dag.to_undirected(), inferred_dag.to_undirected()).items()
         }
-        | {
-            "true_edges": len(reference_dag.edges),
-            "inferred_edges": len(inferred_dag.edges),
-            "true_non_edges": len(list(nx.non_edges(reference_dag))),
-            "inferred_non_edges": len(list(nx.non_edges(inferred_dag))),
-        }
+        | dag_difference_metrics(reference_dag, inferred_dag)
     )
     try:
         # Do this as a separate step in case the DAG is cyclic
@@ -111,7 +91,7 @@ if __name__ == "__main__":
 
     except (nx.HasACycle, ValueError) as e:
         if "error" not in inferred_dag.graph["graph"]:
-            inferred_dag.graph["graph"] = {"error": str(e)}
+            inferred_dag.graph["graph"] = vars(args) | {"error": str(e)}
 
     # output
     root, _ = os.path.split(args.output)

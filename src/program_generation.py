@@ -1,4 +1,3 @@
-import os
 import random
 
 import networkx as nx
@@ -147,12 +146,11 @@ def construct_statement_stack_from_dag(causal_dag: nx.DiGraph):
     return statement_stack
 
 
-def generate_linear_statement(causes):
+def generate_linear_statement(causes: list[str]):
     """Generate a random linear statement of the effect node that includes all of the causes.
 
     Example: Y = (2 * X1) + (3 * X2) + (-4 * X3) + 4 for effect=Y and causes=[X1, X2, X3].
 
-    :param effect: Node to appear on LHS of statement.
     :param causes: Nodes to appear on RHS of statement.
     :return statement: A string representing a linear statement in Python.
     """
@@ -162,7 +160,7 @@ def generate_linear_statement(causes):
     return expr
 
 
-def generate_predicate(conditional_causes):
+def generate_predicate(conditional_causes: list[str]):
     """Generate a predicate from a list of conditional causes.
 
     The predicate is an inequality that checks whether the sum of conditional causes is either greater than or equal to
@@ -179,7 +177,7 @@ def generate_predicate(conditional_causes):
     return inequality
 
 
-def generate_if_else_body(causes, conditional_causes):
+def generate_if_else_body(causes: list[str], conditional_causes: list[str]):
     """Generate a pair of statements for the if and else body corresponding to a particular cause-effect relationship.
 
     This method generates a statement for the true branch of the if statement that includes a random (potentially empty)
@@ -222,17 +220,16 @@ def generate_if_else_body(causes, conditional_causes):
 
 
 def write_statement_stack_to_python_file(
-    statement_stack,
-    sorted_input_nodes,
-    sorted_output_nodes,
-    program_name,
+    statement_stack: list[str],
+    sorted_input_nodes: list[str],
+    sorted_output_nodes: list[str],
+    program_name: str,
 ):
     """Convert a statement stack to a python program.
 
     :param statement_stack: A list of syntax trees that can be executed in python.
     :param sorted_input_nodes: A list of inputs sorted in ascending numerical order (i.e. X1, X2, X3 ...)
     :param sorted_output_nodes: A list of outputs sorted in ascending numerical order (i.e. Y1, Y2, Y3 ...)
-    :param causal_dag: The causal DAG whose structure the program should match.
     :param program_name: A name for the generated python file (excluding the .py extension).
     """
     input_args_str = "".join([f"\t{x}: int,\n" for x in sorted_input_nodes])
@@ -255,9 +252,6 @@ def dag_and_data(n_nodes: int, p_edge: float, p_conditional: float, num_points: 
     """
     dag, inputs = generate_dag(n_nodes=n_nodes, p_edge=p_edge, seed=seed)
     function = generate_program(dag, p_conditional=p_conditional, program_name="program")
-    return dag, pd.DataFrame(function(**{x: np.random.randint(0, 100, size=num_points) for x in inputs}))
+    data = pd.DataFrame(function(**{x: np.random.randint(0, 100, size=num_points) for x in inputs}))
 
-
-if __name__ == "__main__":
-    dag, df = dag_and_data(n_nodes=10, p_edge=0.5, p_conditional=0.25, num_points=100, seed=1)
-    print(df)
+    return dag, data

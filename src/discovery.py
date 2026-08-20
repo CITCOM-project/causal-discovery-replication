@@ -12,30 +12,21 @@ from causal_testing.causal_testing_framework import CausalTestingFramework
 from causal_testing.discovery.abstract_discovery import Discovery
 from causal_testing.discovery.hill_climber_discovery import HillClimberDiscovery
 from causal_testing.specification.causal_dag import CausalDAG
-from pgmpy.causal_discovery import GES, PC, ExpertKnowledge, HillClimbSearch
+from causallearn.search.ConstraintBased.PC import pc
+from causallearn.search.PermutationBased.GRaSP import grasp
+from causallearn.search.ScoreBased.GES import ges
+from causallearn.utils.GraphUtils import GraphUtils
+from causallearn.utils.PDAG2DAG import pdag2dag
+from cdt.metrics import SHD, SID
 
 warnings.filterwarnings("ignore")  # Hide warnings
 
 techniques = {
-    "PC": PC,
-    "GES": GES,
-    "HillClimbSearch": HillClimbSearch,
     "HillClimberDiscovery": HillClimberDiscovery,
+    "pc": pc,
+    "ges": ges,
+    "grasp": grasp,
 }
-
-
-def setup_domain_knowledge(reference_dag: CausalDAG, expert_knowledge_amount: float):
-    required_edges = set(reference_dag.edges())
-    forbidden_edges = set(nx.non_edges(reference_dag))
-    total_edges = len(required_edges) + len(forbidden_edges)
-    sampled_edges = random.sample(
-        sorted(required_edges.union(forbidden_edges)), round(total_edges * expert_knowledge_amount)
-    )
-
-    return ExpertKnowledge(
-        required_edges=required_edges.intersection(sampled_edges),
-        forbidden_edges=forbidden_edges.intersection(sampled_edges),
-    )
 
 
 def load_data(data_path: str, context: bool = False, variables: list[str] = None, data_amount: float = 1):
@@ -73,38 +64,35 @@ def load_data(data_path: str, context: bool = False, variables: list[str] = None
     return df.sample(frac=data_amount)
 
 
-def run_baseline_discovery(
-    technique, df: pd.DataFrame, expert_knowledge: ExpertKnowledge = None, context: bool = False
-) -> nx.DiGraph:
-    args = {"return_type": "dag"}
-    if expert_knowledge:
-        args["expert_knowledge"] = expert_knowledge
+def run_causal_learn_discovery(technique, df: pd.DataFrame):
+    causal_graph = technique(df.to_numpy())
 
-    start_time = time()
-    estimator = technique(**args)
-    estimator.fit(df)
-    end_time = time()
+    if technique == pc:
+        pydot_graph = GraphUtils.to_pydot(pdag2dag(causal_graph.G), labels=list(df.columns))
+    elif technique == ges:
+        pydot_graph = GraphUtils.to_pydot(pdag2dag(causal_graph["G"]), labels=list(df.columns))
+    elif technique == grasp:
+        pydot_graph = GraphUtils.to_pydot(pdag2dag(causal_graph), labels=list(df.columns))
+    else:
+        raise ValueError(f"Unsupported technique {technique}.")
 
-    dag = estimator.causal_graph_
-    dag.graph["graph"] = {"time": end_time - start_time}
-
-    # post-processing removal
-    if context and "file_index" in dag.nodes():
-        dag.remove_node("file_index")
+    dag = CausalDAG()
+    dag.graph["graph"] = {}
+    for node in pydot_graph.get_nodes():
+        dag.add_node(node.get_label())
+    for edge in pydot_graph.get_edges():
+        [source] = pydot_graph.get_node(str(edge.get_source()))
+        [target] = pydot_graph.get_node(str(edge.get_destination()))
+        dag.add_edge(source.get_label(), target.get_label())
     return dag
 
 
-def run_ctf_discovery(
-    technique, df: pd.DataFrame, expert_knowledge: ExpertKnowledge = None, context: bool = False, **kwargs
-) -> nx.DiGraph:
+def run_ctf_discovery(technique, df: pd.DataFrame, **kwargs) -> nx.DiGraph:
     # Need to reset index to allow for multiple files having the same index (i.e. starting at zero).
     # Otherwise you end up with duplicate indices, which causes problems further down the line
     start_time = time()
     discover = technique(
         df=df,
-        exclude_edges=expert_knowledge.forbidden_edges if expert_knowledge else None,
-        include_edges=expert_knowledge.required_edges if expert_knowledge else None,
-        random_seed=start_time,
         alpha=0.01,
         **kwargs,
     )
@@ -113,9 +101,6 @@ def run_ctf_discovery(
 
     dag.graph["graph"] = {"time": end_time - start_time, "seed": start_time}
 
-    # post-processing removal
-    if context and "file_index" in dag.nodes():
-        dag.remove_node("file_index")
     return dag
 
 
@@ -127,13 +112,6 @@ def parse_args():
         "-t", "--technique", help="The algorithm to run. One of GES, HillClimbSearch, PC", required=True
     )
 
-    parser.add_argument(
-        "-c",
-        "--context",
-        action="store_true",
-        default=False,
-        help="Whether to include a 'context' column to store the source file.",
-    )
     parser.add_argument("-r", "--reference-dag", help="Path to reference (ground truth) dag.", required=True)
     parser.add_argument(
         "-e",
@@ -172,6 +150,18 @@ def dag_confusion_matrix(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
         "false_positives": false.intersection(positives),
         "true_negatives": true.intersection(negatives),
         "false_negatives": false.intersection(negatives),
+    }
+
+
+def dag_difference_metrics(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
+    return {
+        "true_edges": len(reference_dag.edges),
+        "inferred_edges": len(inferred_dag.edges),
+        "true_non_edges": len(list(nx.non_edges(reference_dag))),
+        "inferred_non_edges": len(list(nx.non_edges(inferred_dag))),
+        "structural_hamming": SHD(reference_dag, inferred_dag),
+        "structural_intervention": SID(reference_dag, inferred_dag),
+        "edit_distance": next(nx.algorithms.similarity.optimize_graph_edit_distance(reference_dag, inferred_dag)),
     }
 
 
@@ -215,6 +205,7 @@ if __name__ == "__main__":
 
     except ValueError as e:
         inferred_dag = nx.DiGraph()
+        inferred_dag.nodes = reference_dag.nodes
         inferred_dag.graph["graph"] = {"error": str(e)}
 
     inferred_dag.graph["graph"] |= (
@@ -233,12 +224,7 @@ if __name__ == "__main__":
             f"non_directional_{key}": len(value)
             for key, value in dag_confusion_matrix(reference_dag.to_undirected(), inferred_dag.to_undirected()).items()
         }
-        | {
-            "true_edges": len(reference_dag.edges),
-            "inferred_edges": len(inferred_dag.edges),
-            "true_non_edges": len(list(nx.non_edges(reference_dag))),
-            "inferred_non_edges": len(list(nx.non_edges(inferred_dag))),
-        }
+        | dag_difference_metrics(reference_dag, inferred_dag)
     )
     try:
         # Do this as a separate step in case the DAG is cyclic
