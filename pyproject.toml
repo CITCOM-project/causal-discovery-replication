@@ -2,13 +2,12 @@
 name="causal_discovery_replication"
 requires-python=">=3.12"
 dependencies = [
-    "causal-learn>=0.1.4.8",
-    "causal_testing_framework==15.0.0",
-    "cdt>=0.6.0",
-    "pgmpy>=1.1.2",
-    "pre-commit>=4.6.1",
-    "rpy2>=3.6.7",
-    "torch>=2.13.0",
+    "causal-learn==0.1.4.7",
+    "causal-testing-framework==15.0.0",
+    "cdt==0.5.23",
+    "pre-commit==4.6.1",
+    "rpy2==3.5.11",
+    "torch==2.13.0",
 ]
 dynamic=["version"]
 
@@ -20,3 +19,8 @@ target-version = ["py312"]
 [tool.isort]
 profile = "black"
 line_length = 120
+
+[tool.pyproject2conda.dependencies]
+torch = { pip = true }
+cdt = { pip = true }
+causal-learn = { pip = true }
