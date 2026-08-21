@@ -7,6 +7,8 @@
 # You should not manually edit this file.
 # Instead edit the corresponding pyproject.toml file.
 #
+channels:
+  - conda-forge
 dependencies:
   - python==3.12
   - causal-learn>=0.1.4.8
