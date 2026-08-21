@@ -19,9 +19,7 @@ repos:
               "-o", "environment.yaml",
               "--python-include", "python==3.12",
               "-c", "conda-forge",
-              "-r",
-              "--index-url",
-              "https://download.pytorch.org/whl/cpu",
+              "-r", '"--index-url https://download.pytorch.org/whl/cpu"',
               "-w",
               "force"
             ]
