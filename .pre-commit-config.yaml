@@ -15,4 +15,13 @@ repos:
   hooks:
     - id: pyproject2conda-yaml
       language_version: python3.13
-      args: ["-o", "environment.yaml", "--python-include", "python==3.12", "-c", "conda-forge"]
+      args: [
+              "-o", "environment.yaml",
+              "--python-include", "python==3.12",
+              "-c", "conda-forge",
+              "-r",
+              "--index-url",
+              "https://download.pytorch.org/whl/cpu",
+              "-w",
+              "force"
+            ]
