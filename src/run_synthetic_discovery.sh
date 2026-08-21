@@ -7,6 +7,7 @@
 
 echo "sbatch src/run_synthetic_discovery.sh $@"
 
+module load R/4.4.1-foss-2022b
 module load Anaconda3/2024.02-1
 source activate causal-discovery
 

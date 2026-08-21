@@ -3,7 +3,7 @@ name="causal_discovery_replication"
 requires-python=">=3.12"
 dependencies = [
     "causal-learn>=0.1.4.8",
-    "causal_testing_framework == 15.0.0",
+    "causal_testing_framework==15.0.0",
     "cdt>=0.6.0",
     "pgmpy>=1.1.2",
     "pre-commit>=4.6.1",
