@@ -10,16 +10,3 @@ repos:
   hooks:
     - id: black
       language_version: python3.11
-- repo: https://github.com/usnistgov/pyproject2conda
-  rev: v0.22.1
-  hooks:
-    - id: pyproject2conda-yaml
-      language_version: python3.13
-      args: [
-              "-o", "environment.yaml",
-              "--python-include", "python==3.12",
-              "-c", "conda-forge",
-              "-r", '"--index-url https://download.pytorch.org/whl/cpu"',
-              "-w",
-              "force"
-            ]
