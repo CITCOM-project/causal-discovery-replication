@@ -1,0 +1,16 @@
+Bootstrap: docker
+From: python:3.12-bookworm
+
+%files
+src src
+pyproject.toml pyproject.toml
+
+%post
+apt update
+apt install -y r-base r-base-dev
+chmod +x src/run_synthetic_discovery.sh
+Rscript src/setup.r
+pip install .
+
+%runscript
+/bin/bash src/run_synthetic_discovery.sh
