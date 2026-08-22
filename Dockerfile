@@ -11,16 +11,12 @@ RUN apt update; apt install -y r-base
 
 USER 1002:1002
 
-
 # Clone the repo and set up config with dummy details
-RUN git clone https://github.com/CITCOM-project/causal-discovery-replication.git
+COPY --chown=1002:1002 src src
+COPY --chown=1002:1002 pyproject.toml pyproject.toml
 
-WORKDIR /home/experimental/causal-discovery-replication
-
-RUN git checkout jmafoster1/new-results; \
-  chmod +x src/run_synthetic_discovery.sh; \
+RUN chmod +x src/run_synthetic_discovery.sh; \
+  Rscript src/setup.r; \
   pip install .
-COPY --chown=1002:1002 src/setup.r setup.r
-RUN Rscript setup.r
 
 ENTRYPOINT ["/bin/bash", "src/run_synthetic_discovery.sh"]
