@@ -101,10 +101,27 @@ def scatters(df: pd.DataFrame, group_by: str, x_column: str, y_column: str):
     res, p_value = spearmanr(df[x_column], df[y_column], nan_policy="omit")
 
 
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
+
+
 if __name__ == "__main__":
     if not os.path.exists("figures"):
         os.mkdir("figures")
     df = read_data("data.csv")
+
+    # with open("synthetic_configurations.txt") as f:
+    #     for line in f:
+    #         line = line.strip()
+    #         args = {k: v for k, v in chunks(line.split(" "), 2)}
+    #         if not ((df["seed"] == int(args["-s"])) & (df["technique"] == args["-t"])).any():
+    #             print(
+    #                 "sbatch --time=04:00:00 --nodes=1 --ntasks=1 --cpus-per-task=1 --mem=8G apptainer exec apptainer.sif python src/synthetic_discovery.py",
+    #                 line,
+    #             )
+
     plot_accuracy(df, "pass")
     plot_accuracy(df, "fail")
     plot_accuracy(df, "inestimable")
@@ -117,6 +134,7 @@ if __name__ == "__main__":
 
     df["normalised_edit_distance"] = df["edit_distance"] / (df["true_edges"] + df["inferred_edges"])
     df["normalised_structural_hamming"] = df["structural_hamming"] / (df["true_edges"] + df["inferred_edges"])
+    df["normalised_structural_intervention"] = df["structural_intervention"] / df["nodes"] * (df["nodes"] - 1)
 
     scatter(df, "directional_sensitivity", "pass")
     scatter(df, "directional_specificity", "pass")
@@ -124,6 +142,7 @@ if __name__ == "__main__":
     scatter(df, "normalised_structural_hamming", "pass")
     scatter(df, "directional_sensitivity", "normalised_structural_hamming")
     scatter(df, "directional_sensitivity", "structural_hamming")
+    scatter(df, "normalised_structural_intervention", "pass")
 
     # scatter(df, "nodes", "edit_distance")
     # scatter(df, "nodes", "structural_hamming")

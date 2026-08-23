@@ -1,6 +1,7 @@
 *.egg-info/
 __pycache__/
 results/
+results_synthetic/
 figures/
 apptainer.sif
 *.zip

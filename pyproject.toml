@@ -5,6 +5,7 @@ dependencies = [
     "causal-learn==0.1.4.8",
     "causal-testing-framework==15.0.0",
     "cdt==0.5.23",
+    "matplotlib>=3.11.1",
     "pre-commit==4.6.1",
     "rpy2==3.5.11",
     "torch==2.13.0",
