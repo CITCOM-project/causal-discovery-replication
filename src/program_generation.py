@@ -242,6 +242,9 @@ def write_statement_stack_to_python_file(
     method = method_definition_str + "\n".join(statement_stack) + return_str
 
     namespace = {"np": np}
+
+    with open("/tmp/program.py", "w") as f:
+        f.write(method)
     exec(method, namespace)
     return namespace[program_name]
 
@@ -250,15 +253,18 @@ def dag_and_data(n_nodes: int, p_edge: float, p_conditional: float, num_points: 
     """
     Generate a causal DAG and associated dataset.
     """
+
+    np.random.seed(seed)
+
     dag, inputs = generate_dag(n_nodes=n_nodes, p_edge=p_edge, seed=seed)
     function = generate_program(dag, p_conditional=p_conditional, program_name="program")
     data = pd.DataFrame(function(**{x: np.random.randint(0, 100, size=num_points) for x in inputs}))
 
-    output_columns = [column for column in data if column.startswith("Y")]
-    data[output_columns] += np.random.normal(
-        loc=0,
-        scale=0.10 * (data[output_columns].max() - data[output_columns].min()),
-        size=(len(data), len(output_columns)),
-    )
+    # output_columns = [column for column in data if column.startswith("Y")]
+    # data[output_columns] += np.random.normal(
+    #     loc=0,
+    #     scale=0.10 * (data[output_columns].max() - data[output_columns].min()),
+    #     size=(len(data), len(output_columns)),
+    # )
 
     return dag, data

@@ -88,6 +88,9 @@ if __name__ == "__main__":
     try:
         # Do this as a separate step in case the DAG is cyclic
         inferred_dag.graph["graph"] |= {k.name.lower(): v for k, v in evaluate_dag(inferred_dag, data).items()}
+        inferred_dag.graph["graph"] |= {
+            "reference_" + k.name.lower(): v for k, v in evaluate_dag(reference_dag, data).items()
+        }
 
     except (nx.HasACycle, ValueError) as e:
         if "error" not in inferred_dag.graph["graph"]:
