@@ -2,10 +2,6 @@ import random
 
 from discovery import techniques
 
-DATA_SIZES = [100, 1000, 5000]
-PROBABILITIES = [0.25, 0.5, 0.75, 1]
-NODES = [10, 20, 30]
-
 configurations = []
 for seed in range(250):
     for technique in techniques:
