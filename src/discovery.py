@@ -126,7 +126,8 @@ def parse_args():
 
 
 def evaluate_dag(dag: nx.DiGraph, df: pd.DataFrame):
-    causal_dag = CausalDAG(datatypes=df.dtypes)
+    # There won't be cycles, but we do want to force the identification sets to be the parents rather than the minimal
+    causal_dag = CausalDAG(datatypes=df.dtypes, ignore_cycles=True)
     causal_dag.add_nodes_from(dag.nodes())
     causal_dag.add_edges_from(dag.edges())
     framework = CausalTestingFramework(dag=causal_dag, df=df, test_cases=causal_dag.generate_causal_tests())
