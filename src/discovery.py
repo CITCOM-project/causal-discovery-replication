@@ -140,16 +140,11 @@ def evaluate_dag(dag: nx.DiGraph, df: pd.DataFrame):
 
 def dag_confusion_matrix(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
 
-    true = set(reference_dag.edges())
-    false = set(nx.non_edges(reference_dag))
-    positives = set(inferred_dag.edges())
-    negatives = set(nx.non_edges(inferred_dag))
-
     return {
-        "true_positives": true.intersection(positives),
-        "false_positives": false.intersection(positives),
-        "true_negatives": true.intersection(negatives),
-        "false_negatives": false.intersection(negatives),
+        "true_positives": [edge for edge in inferred_dag.edges if edge in reference_dag.edges],
+        "false_positives": [edge for edge in inferred_dag.edges if edge not in reference_dag.edges],
+        "true_negatives": [edge for edge in nx.non_edges(inferred_dag) if edge not in reference_dag.edges],
+        "false_negatives": [edge for edge in nx.non_edges(inferred_dag) if edge in reference_dag.edges],
     }
 
 

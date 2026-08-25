@@ -49,7 +49,20 @@ def generate_dag(n_nodes: int, p_edge: float, seed: int = None) -> nx.DiGraph:
     # Identify input nodes (exogenous) and output nodes (endogenous)
     input_nodes = [node for node in causal_dag.nodes if not list(causal_dag.predecessors(node))]
     output_nodes = [node for node in causal_dag.nodes if node not in input_nodes]
+
+    if not output_nodes:
+        split_point = random.randint(1, len(input_nodes) // 2)
+        output_nodes = input_nodes[split_point:]
+        input_nodes = input_nodes[:split_point]
     output_nodes.sort()
+
+    # Have orphan input nodes cause some output
+    for node in input_nodes:
+        if causal_dag.in_degree(node) == 0 and causal_dag.out_degree(node) == 0:
+            if output_nodes:
+                causal_dag.add_edge(node, random.choice(output_nodes))
+            else:
+                causal_dag.add_edge(node, random.choice(output_nodes))
 
     # Rename inputs and outputs as X and Y variables, respectively
     input_node_map = {v: f"X{i+1}" for i, v in enumerate(input_nodes)}
@@ -156,7 +169,7 @@ def generate_linear_statement(causes: list[str]):
     """
     coefficients = [random.choice([random.randint(1, 10), random.randint(-10, -1)]) for _ in causes]
     expr = " + ".join([f"({c} * {x})" for c, x in zip(coefficients, causes)])
-    expr += f" + {random.choice([random.randint(0, 10), random.randint(-10, 0)])}"
+    expr += f" + {random.uniform(-10, 10)}"
     return expr
 
 
@@ -258,13 +271,13 @@ def dag_and_data(n_nodes: int, p_edge: float, p_conditional: float, num_points: 
 
     dag, inputs = generate_dag(n_nodes=n_nodes, p_edge=p_edge, seed=seed)
     function = generate_program(dag, p_conditional=p_conditional, program_name="program")
-    data = pd.DataFrame(function(**{x: np.random.randint(0, 100, size=num_points) for x in inputs}))
+    data = pd.DataFrame(function(**{x: np.random.uniform(low=-100, high=100, size=num_points) for x in inputs}))
 
-    # output_columns = [column for column in data if column.startswith("Y")]
-    # data[output_columns] += np.random.normal(
-    #     loc=0,
-    #     scale=0.10 * (data[output_columns].max() - data[output_columns].min()),
-    #     size=(len(data), len(output_columns)),
-    # )
+    output_columns = [column for column in data if column.startswith("Y")]
+    data[output_columns] += np.random.normal(
+        loc=0,
+        scale=0.10 * (data[output_columns].max() - data[output_columns].min()),
+        size=(len(data), len(output_columns)),
+    )
 
     return dag, data
