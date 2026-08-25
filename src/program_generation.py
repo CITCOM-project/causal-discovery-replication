@@ -157,7 +157,7 @@ def generate_linear_statement(causes: list[str]):
     coefficients = [random.choice([random.randint(1, 10), random.randint(-10, -1)]) for _ in causes]
     expr = " + ".join([f"({c} * {x})" for c, x in zip(coefficients, causes)])
     expr += f" + {random.choice([random.randint(0, 10), random.randint(-10, 0)])}"
-    return expr
+    return f"({expr}) * np.random.normal(loc=1, scale=0.10)"
 
 
 def generate_predicate(conditional_causes: list[str]):
@@ -260,12 +260,12 @@ def dag_and_data(n_nodes: int, p_edge: float, p_conditional: float, num_points: 
     function = generate_program(dag, p_conditional=p_conditional, program_name="program")
     data = pd.DataFrame(function(**{x: np.random.randint(0, 100, size=num_points) for x in inputs}))
 
-    output_columns = [column for column in data if column.startswith("Y")]
+    # output_columns = [column for column in data if column.startswith("Y")]
     # data[output_columns] += np.random.normal(
     #     loc=0,
     #     scale=0.10 * (data[output_columns].max() - data[output_columns].min()),
     #     size=(len(data), len(output_columns)),
     # )
-    data[output_columns] += np.random.normal(loc=0, scale=0.10 * data[output_columns].abs())
+    # data[output_columns] += np.random.normal(loc=0, scale=0.10 * data[output_columns].abs())
 
     return dag, data
