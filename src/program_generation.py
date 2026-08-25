@@ -258,7 +258,7 @@ def dag_and_data(n_nodes: int, p_edge: float, p_conditional: float, num_points: 
 
     dag, inputs = generate_dag(n_nodes=n_nodes, p_edge=p_edge, seed=seed)
     function = generate_program(dag, p_conditional=p_conditional, program_name="program")
-    data = pd.DataFrame(function(**{x: np.random.randint(0, 100, size=num_points) for x in inputs}))
+    data = pd.DataFrame(function(**{x: np.random.rand(num_points) * 100 for x in inputs}))
 
     # output_columns = [column for column in data if column.startswith("Y")]
     # data[output_columns] += np.random.normal(
