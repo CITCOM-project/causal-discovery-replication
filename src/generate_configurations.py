@@ -7,12 +7,12 @@ for seed in range(250):
     for technique in techniques:
         random.seed(seed)
         data = random.randint(10, 1000)
-        nodes = random.randint(10, 30)
-        p_edge = random.uniform(0.25, 1)
-        p_conditional = random.uniform(0.25, 1)
+        n_nodes = (random.randint(10, 30),)
+        p_edge = (random.uniform(0.01, 0.1),)
+        p_conditional = (random.random(),)
         output_file = f"results_synthetic/{technique}/{seed}.dot"
         configurations.append(
-            f"-o {output_file} -t {technique} -D {data} -n {nodes} -E {p_edge} -c {p_conditional} -s {seed}"
+            f"-o {output_file} -t {technique} -D {data} -n {n_nodes} -E {p_edge} -c {p_conditional} -s {seed}"
         )
 
 
