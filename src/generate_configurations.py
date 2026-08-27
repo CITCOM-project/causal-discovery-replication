@@ -10,6 +10,7 @@ for seed in range(250):
         n_nodes = (random.randint(10, 30),)
         p_conditional = (random.random(),)
         output_file = f"results_synthetic/{technique}/{seed}.dot"
+        reference_output_file = f"reference_synthetic/{technique}/{seed}.dot"
         configurations.append(f"-o {output_file} -t {technique} -D {data} -n {n_nodes} -c {p_conditional} -s {seed}")
 
 

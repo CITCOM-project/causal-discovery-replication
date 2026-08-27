@@ -22,6 +22,7 @@ EDGES_PER_NODE = 2
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--output", help="Path for output DAG file (.dot)", required=True)
+    parser.add_argument("-r", "--reference-output", help="Path for reference DAG file (.dot)", required=True)
     parser.add_argument(
         "-t", "--technique", help="The algorithm to run. One of GES, HillClimbSearch, PC", required=True
     )
@@ -103,7 +104,9 @@ if __name__ == "__main__":
             inferred_dag.graph["graph"] = vars(args) | {"error": str(e)}
 
     # output
-    root, _ = os.path.split(args.output)
-    if not os.path.exists(root):
-        os.makedirs(root)
+    for output in [args.output, args.reference_output]:
+        root, _ = os.path.split(output)
+        if not os.path.exists(root):
+            os.makedirs(root)
     nx.drawing.nx_pydot.write_dot(inferred_dag, args.output)
+    nx.drawing.nx_pydot.write_dot(reference_dag, args.reference_output)
