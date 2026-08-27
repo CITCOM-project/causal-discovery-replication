@@ -8,12 +8,9 @@ for seed in range(250):
         random.seed(seed)
         data = random.randint(10, 1000)
         n_nodes = (random.randint(10, 30),)
-        p_edge = (random.uniform(0.01, 0.1),)
         p_conditional = (random.random(),)
         output_file = f"results_synthetic/{technique}/{seed}.dot"
-        configurations.append(
-            f"-o {output_file} -t {technique} -D {data} -n {n_nodes} -E {p_edge} -c {p_conditional} -s {seed}"
-        )
+        configurations.append(f"-o {output_file} -t {technique} -D {data} -n {n_nodes} -c {p_conditional} -s {seed}")
 
 
 with open("synthetic_configurations.txt", "w") as f:

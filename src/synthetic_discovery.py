@@ -14,6 +14,10 @@ from discovery import (
 )
 from program_generation import dag_and_data
 
+# We set the number of edges per node to 2 to reflect the fact that most software errors come from small
+# numbers of interacting variables
+EDGES_PER_NODE = 2
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -33,7 +37,6 @@ def parse_args():
         "-D", "--data-amount", type=int, help="The number of the data points to generate.", required=True
     )
     parser.add_argument("-n", "--nodes", type=int, help="The number of nodes to generate.", required=True)
-    parser.add_argument("-E", "--edge-probability", type=float, help="The probability of edge creation.", default=0.5)
     parser.add_argument(
         "-c",
         "--conditional-probability",
@@ -52,9 +55,12 @@ if __name__ == "__main__":
         raise ValueError(f"Unsupported technique {args.technique}. Must be one of {list(techniques)}.")
     technique = techniques[args.technique]
 
+    n_edges = EDGES_PER_NODE * args.nodes
+    p_edge = min(n_edges / ((args.nodes * (args.nodes - 1)) / 2), 0.99)
+
     reference_dag, data = dag_and_data(
         n_nodes=args.nodes,
-        p_edge=args.edge_probability,
+        p_edge=p_edge,
         p_conditional=args.conditional_probability,
         num_points=args.data_amount,
         seed=args.seed,
