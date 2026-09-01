@@ -93,7 +93,6 @@ def run_ctf_discovery(technique, df: pd.DataFrame, **kwargs) -> nx.DiGraph:
     start_time = time()
     discover = technique(
         df=df,
-        alpha=0.01,
         **kwargs,
     )
     dag = discover.discover()
@@ -176,25 +175,17 @@ if __name__ == "__main__":
         data_amount=args.data_amount,
     )
 
-    expert_knowledge = (
-        setup_domain_knowledge(reference_dag, args.expert_knowledge_amount)
-        if args.reference_dag and args.expert_knowledge_amount
-        else None
-    )
-
     try:
         if issubclass(technique, Discovery):
             inferred_dag = run_ctf_discovery(
                 technique,
                 df=data,
-                expert_knowledge=expert_knowledge,
                 context=args.context,
             )
         else:
-            inferred_dag = run_baseline_discovery(
+            inferred_dag = run_causal_learn_discovery(
                 technique,
                 df=data,
-                expert_knowledge=expert_knowledge,
                 context=args.context,
             )
 
