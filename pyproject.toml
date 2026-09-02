@@ -9,6 +9,7 @@ dependencies = [
     "pre-commit==4.6.1",
     "rpy2==3.5.11",
     "torch==2.13.0",
+    "statsmodels==0.14.6"
 ]
 dynamic=["version"]
 

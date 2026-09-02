@@ -67,6 +67,8 @@ def load_data(data_path: str, context: bool = False, variables: list[str] = None
 def run_causal_learn_discovery(technique, df: pd.DataFrame):
     causal_graph = technique(df.to_numpy())
 
+    start_time = time()
+
     if technique == pc:
         pydot_graph = GraphUtils.to_pydot(pdag2dag(causal_graph.G), labels=list(df.columns))
     elif technique == ges:
@@ -75,9 +77,13 @@ def run_causal_learn_discovery(technique, df: pd.DataFrame):
         pydot_graph = GraphUtils.to_pydot(pdag2dag(causal_graph), labels=list(df.columns))
     else:
         raise ValueError(f"Unsupported technique {technique}.")
+    end_time = time()
 
     dag = CausalDAG()
-    dag.graph["graph"] = {}
+    if "graph" not in dag.graph:
+        dag.graph["graph"] = {}
+    dag.graph["graph"] |= {"time": end_time - start_time}
+
     for node in pydot_graph.get_nodes():
         dag.add_node(node.get_label())
     for edge in pydot_graph.get_edges():
@@ -87,18 +93,24 @@ def run_causal_learn_discovery(technique, df: pd.DataFrame):
     return dag
 
 
-def run_ctf_discovery(technique, df: pd.DataFrame, **kwargs) -> nx.DiGraph:
+def run_ctf_discovery(technique, df: pd.DataFrame, random_seed: int = None, **kwargs) -> nx.DiGraph:
     # Need to reset index to allow for multiple files having the same index (i.e. starting at zero).
     # Otherwise you end up with duplicate indices, which causes problems further down the line
     start_time = time()
+    if random_seed is None:
+        random_seed = start_time
     discover = technique(
         df=df,
+        random_seed=random_seed,
         **kwargs,
     )
     dag = discover.discover()
     end_time = time()
 
-    dag.graph["graph"] = {"time": end_time - start_time, "seed": start_time}
+    if "graph" not in dag.graph:
+        dag.graph["graph"] = {}
+
+    dag.graph["graph"] |= {"time": end_time - start_time, "seed": random_seed}
 
     return dag
 
@@ -125,16 +137,18 @@ def parse_args():
 
 
 def evaluate_dag(dag: nx.DiGraph, df: pd.DataFrame):
-    causal_dag = CausalDAG(datatypes=df.dtypes)
+
+    causal_dag = CausalDAG(datatypes=df.dtypes, ignore_cycles=True)
     causal_dag.add_nodes_from(dag.nodes())
     causal_dag.add_edges_from(dag.edges())
+
     framework = CausalTestingFramework(dag=causal_dag, df=df, test_cases=causal_dag.generate_causal_tests())
     framework.run_tests(silent=True)
-
-    return {
-        k: v / len(framework.test_cases)
+    counts = {
+        k.name.lower(): v / len(framework.test_cases)
         for k, v in Counter([test.result.outcome for test in framework.test_cases]).items()
     }
+    return counts
 
 
 def dag_confusion_matrix(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
@@ -177,16 +191,11 @@ if __name__ == "__main__":
 
     try:
         if issubclass(technique, Discovery):
-            inferred_dag = run_ctf_discovery(
-                technique,
-                df=data,
-                context=args.context,
-            )
+            inferred_dag = run_ctf_discovery(technique, df=data, context=args.context, random_seed=args.seed)
         else:
             inferred_dag = run_causal_learn_discovery(
                 technique,
                 df=data,
-                context=args.context,
             )
 
     except ValueError as e:
@@ -199,8 +208,6 @@ if __name__ == "__main__":
             "technique": args.technique,
             "expert_knowledge_amount": args.expert_knowledge_amount,
             "data_points": len(data),
-            "required_edges": len(expert_knowledge.required_edges) if expert_knowledge else 0,
-            "forbidden_edges": len(expert_knowledge.forbidden_edges) if expert_knowledge else 0,
             "pass": 0,
             "fail": 0,
             "inestimable": 0,
@@ -214,7 +221,7 @@ if __name__ == "__main__":
     )
     try:
         # Do this as a separate step in case the DAG is cyclic
-        inferred_dag.graph["graph"] |= {k.name.lower(): v for k, v in evaluate_dag(inferred_dag, data).items()}
+        inferred_dag.graph["graph"] |= evaluate_dag(inferred_dag, data)
 
     except (nx.HasACycle, ValueError) as e:
         if "error" not in inferred_dag.graph["graph"]:
