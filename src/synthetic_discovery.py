@@ -2,7 +2,6 @@ import argparse
 import os
 
 import networkx as nx
-from causal_testing.discovery.abstract_discovery import Discovery
 
 from discovery import (
     dag_confusion_matrix,
@@ -43,7 +42,7 @@ def parse_args():
         "--conditional-probability",
         type=float,
         help="The probability of a causal relationship being conditional.",
-        default=0.5,
+        default=0,
     )
     parser.add_argument("-s", "--seed", type=int, help="Random seed.")
     return parser.parse_args()
@@ -71,7 +70,11 @@ if __name__ == "__main__":
         if args.technique in ["pc", "ges", "grasp"]:
             inferred_dag = run_causal_learn_discovery(technique=technique, df=data)
         else:
-            inferred_dag = run_ctf_discovery(technique, df=data, random_seed=args.seed)
+            inferred_dag = run_ctf_discovery(
+                technique,
+                df=data,
+                random_seed=args.seed,
+            )
 
     except ValueError as e:
         inferred_dag = nx.DiGraph()
@@ -93,9 +96,9 @@ if __name__ == "__main__":
         | dag_difference_metrics(reference_dag, inferred_dag)
     )
     try:
-        # Do this as a separate step in case the DAG is cyclic
-        inferred_dag.graph["graph"] |= evaluate_dag(inferred_dag, data)
+        # Do this as a separate step in case the DAG is cyclic - it shouldn't be!
         inferred_dag.graph["graph"] |= {"reference_" + k: v for k, v in evaluate_dag(reference_dag, data).items()}
+        inferred_dag.graph["graph"] |= evaluate_dag(inferred_dag, data)
 
     except (nx.HasACycle, ValueError) as e:
         if "error" not in inferred_dag.graph["graph"]:

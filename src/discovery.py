@@ -12,10 +12,12 @@ from causal_testing.causal_testing_framework import CausalTestingFramework
 from causal_testing.discovery.abstract_discovery import Discovery
 from causal_testing.discovery.hill_climber_discovery import HillClimberDiscovery
 from causal_testing.specification.causal_dag import CausalDAG
+from causallearn.graph.GraphNode import GraphNode
 from causallearn.search.ConstraintBased.PC import pc
 from causallearn.search.PermutationBased.GRaSP import grasp
 from causallearn.search.ScoreBased.GES import ges
 from causallearn.utils.GraphUtils import GraphUtils
+from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 from causallearn.utils.PDAG2DAG import pdag2dag
 from cdt.metrics import SHD, SID
 
@@ -64,10 +66,36 @@ def load_data(data_path: str, context: bool = False, variables: list[str] = None
     return df.sample(frac=data_amount)
 
 
-def run_causal_learn_discovery(technique, df: pd.DataFrame):
-    causal_graph = technique(df.to_numpy())
+def compare_pass_rates(reference_dag: CausalDAG, inferred_dag: CausalDAG, df: pd.DataFrame) -> dict:
+    reference_ctf = CausalTestingFramework(dag=reference_dag, df=df)
+    reference_dag.datatypes = df.dtypes
+    reference_ctf.test_cases = reference_dag.generate_causal_tests()
+    reference_ctf.execute_tests()
+    reference_tests = {test.name: test.outcome for test in reference_ctf.test_cases}
 
+    inferred_ctf = CausalTestingFramework(dag=inferred_dag, df=df)
+    inferred_dag.datatypes = df.dtypes
+    inferred_ctf.test_cases = inferred_dag.generate_causal_tests()
+    inferred_ctf.execute_tests()
+
+    counts = {"pass": 0, "fail": 0, "inestimable": 0}
+    total = 0
+    for test in inferred_ctf.test_cases:
+        if test.passed:
+            counts["pass"] += 1
+            total += 1
+        if test.outcome == TestOutcome.FAIL and reference_tests.get(test.name) != TestOutcome.FAIL:
+            counts[fail] += 1
+
+
+def run_causal_learn_discovery(technique, df: pd.DataFrame, **kwargs) -> CausalDAG:
     start_time = time()
+
+    if technique == pc:
+        bk = BackgroundKnowledge().add_forbidden_by_pattern(".*", r"X\d+")
+        causal_graph = technique(df.to_numpy(), background_knowledge=bk, node_names=df.columns, **kwargs)
+    else:
+        causal_graph = technique(df.to_numpy(), node_names=df.columns)
 
     if technique == pc:
         pydot_graph = GraphUtils.to_pydot(pdag2dag(causal_graph.G), labels=list(df.columns))
@@ -79,7 +107,7 @@ def run_causal_learn_discovery(technique, df: pd.DataFrame):
         raise ValueError(f"Unsupported technique {technique}.")
     end_time = time()
 
-    dag = CausalDAG()
+    dag = CausalDAG(ignore_cycles=True)
     if "graph" not in dag.graph:
         dag.graph["graph"] = {}
     dag.graph["graph"] |= {"time": end_time - start_time}
@@ -93,7 +121,9 @@ def run_causal_learn_discovery(technique, df: pd.DataFrame):
     return dag
 
 
-def run_ctf_discovery(technique, df: pd.DataFrame, random_seed: int = None, **kwargs) -> nx.DiGraph:
+def run_ctf_discovery(
+    technique, df: pd.DataFrame, random_seed: int = None, initial_individual: CausalDAG = None, **kwargs
+) -> CausalDAG:
     # Need to reset index to allow for multiple files having the same index (i.e. starting at zero).
     # Otherwise you end up with duplicate indices, which causes problems further down the line
     start_time = time()
@@ -102,9 +132,10 @@ def run_ctf_discovery(technique, df: pd.DataFrame, random_seed: int = None, **kw
     discover = technique(
         df=df,
         random_seed=random_seed,
+        exclude_edges=[(".*", r"X\d+")] + kwargs.pop("exclude_edges", []),
         **kwargs,
     )
-    dag = discover.discover()
+    dag = discover.discover(individual=initial_individual)
     end_time = time()
 
     if "graph" not in dag.graph:
@@ -148,6 +179,7 @@ def evaluate_dag(dag: nx.DiGraph, df: pd.DataFrame):
         k.name.lower(): v / len(framework.test_cases)
         for k, v in Counter([test.result.outcome for test in framework.test_cases]).items()
     }
+    framework.save_results("/tmp/results.json")
     return counts
 
 

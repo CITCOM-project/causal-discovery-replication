@@ -16,7 +16,8 @@ def read_file(dag_path):
     split = os.path.normpath(os.path.splitext(dag_path)[0]).split(os.sep)
     dag = pydot.graph_from_dot_file(dag_path)[0]
     configuration = {
-        k: float(v) if k not in ["technique", "error", "output"] else v for k, v in dag.get_attributes().items()
+        k: float(v) if k not in ["technique", "error", "output", "reference_output", "hill_climb"] else v
+        for k, v in dag.get_attributes().items()
     }
     configuration["dag_path"] = dag_path
 
@@ -75,18 +76,22 @@ def plot_accuracy(df: pd.DataFrame, column: str):
     ax.set_ylim(0, 1)
     plt.tight_layout()
     plt.savefig(f"figures/{column}.png")
+    plt.close()
 
 
 def scatter(df: pd.DataFrame, x_column: str, y_column: str):
+    res, p_value = spearmanr(df[x_column], df[y_column], nan_policy="omit")
+
     _, ax = plt.subplots()
     ax.scatter(df[x_column], df[y_column])
     ax.set_xlabel(x_column)
     ax.set_ylabel(y_column)
+    ax.set_title(f"spearmanr={round(res,2)} ({round(p_value, 2)})")
     plt.tight_layout()
     plt.savefig(f"figures/{x_column}_{y_column}.png")
-    res, p_value = spearmanr(df[x_column], df[y_column], nan_policy="omit")
     print("Statistic", res, "p-value", p_value)
     print(df[[x_column, y_column]])
+    plt.close()
 
 
 def scatters(df: pd.DataFrame, group_by: str, x_column: str, y_column: str):
@@ -98,7 +103,7 @@ def scatters(df: pd.DataFrame, group_by: str, x_column: str, y_column: str):
     plt.legend()
     plt.tight_layout()
     plt.savefig(f"figures/{x_column}_{y_column}.png")
-    res, p_value = spearmanr(df[x_column], df[y_column], nan_policy="omit")
+    plt.close()
 
 
 def chunks(lst, n):
@@ -112,6 +117,8 @@ if __name__ == "__main__":
         os.mkdir("figures")
     df = read_data("data.csv")
 
+    df["normalised_pass"] = df["pass"] / df["reference_pass"]
+
     # with open("synthetic_configurations.txt") as f:
     #     for line in f:
     #         line = line.strip()
@@ -122,6 +129,10 @@ if __name__ == "__main__":
     #                 line,
     #             )
 
+    df["normalised_edit_distance"] = df["edit_distance"] / (((df["nodes"] * (df["nodes"] - 1)) / 2))
+    df["normalised_structural_hamming"] = df["structural_hamming"] / (((df["nodes"] * (df["nodes"] - 1)) / 2))
+    df["normalised_structural_intervention"] = df["structural_intervention"] / (((df["nodes"] * (df["nodes"] - 1))))
+
     plot_accuracy(df, "pass")
     plot_accuracy(df, "fail")
     plot_accuracy(df, "inestimable")
@@ -131,23 +142,34 @@ if __name__ == "__main__":
     plot_accuracy(df, "non_directional_specificity")
     plot_accuracy(df, "directional_bcr")
     plot_accuracy(df, "non_directional_bcr")
-
-    df["normalised_edit_distance"] = df["edit_distance"] / (df["true_edges"] + df["inferred_edges"])
-    df["normalised_structural_hamming"] = df["structural_hamming"] / (df["true_edges"] + df["inferred_edges"])
-    df["normalised_structural_intervention"] = df["structural_intervention"] / df["nodes"] * (df["nodes"] - 1)
+    plot_accuracy(df, "normalised_structural_intervention")
+    plot_accuracy(df, "normalised_structural_hamming")
 
     scatter(df, "directional_sensitivity", "pass")
     scatter(df, "directional_specificity", "pass")
-    scatter(df, "normalised_edit_distance", "pass")
-    scatter(df, "normalised_structural_hamming", "pass")
-    scatter(df, "directional_sensitivity", "normalised_structural_hamming")
-    scatter(df, "directional_sensitivity", "structural_hamming")
+    scatter(df, "non_directional_sensitivity", "pass")
+    scatter(df, "non_directional_specificity", "pass")
+    scatter(df, "directional_bcr", "pass")
+    scatter(df, "non_directional_bcr", "pass")
+
     scatter(df, "normalised_structural_intervention", "pass")
-
-    # scatter(df, "nodes", "edit_distance")
-    # scatter(df, "nodes", "structural_hamming")
-
+    scatters(df, "technique", "normalised_structural_intervention", "pass")
+    scatters(df, "technique", "normalised_structural_hamming", "pass")
+    scatters(df, "technique", "normalised_edit_distance", "pass")
+    #
+    # # scatter(df, "nodes", "edit_distance")
+    # # scatter(df, "nodes", "structural_hamming")
+    #
+    scatters(df, "technique", "directional_bcr", "pass")
     scatters(df, "technique", "data_amount", "pass")
     scatters(df, "technique", "nodes", "pass")
-    scatters(df, "technique", "edge_probability", "pass")
+    # scatters(df, "technique", "edge_probability", "pass")
     scatters(df, "technique", "conditional_probability", "pass")
+
+    scatters(df, "technique", "data_amount", "normalised_structural_intervention")
+    scatters(df, "technique", "data_amount", "normalised_structural_hamming")
+
+    scatters(df, "technique", "conditional_probability", "normalised_structural_intervention")
+    scatters(df, "technique", "conditional_probability", "normalised_structural_hamming")
+
+    # scatter(df.query("technique == 'HillClimberDiscovery'"), "normalised_structural_intervention", "pass")
