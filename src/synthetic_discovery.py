@@ -48,8 +48,11 @@ def parse_args():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+def main():
     args = parse_args()
+
+    if os.path.exists(args.output):
+        return
 
     if args.technique not in techniques:
         raise ValueError(f"Unsupported technique {args.technique}. Must be one of {list(techniques)}.")
@@ -111,3 +114,7 @@ if __name__ == "__main__":
             os.makedirs(root)
     nx.drawing.nx_pydot.write_dot(inferred_dag, args.output)
     nx.drawing.nx_pydot.write_dot(reference_dag, args.reference_output)
+
+
+if __name__ == "__main__":
+    main()

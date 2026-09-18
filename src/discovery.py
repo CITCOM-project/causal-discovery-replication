@@ -1,8 +1,9 @@
 import argparse
 import os
-import random  # no point seeding random since we can't seed the causal discovery techniques
 import warnings
 from collections import Counter
+from collections.abc import Callable
+from multiprocessing import Process, Queue
 from time import time
 
 import networkx as nx
@@ -12,7 +13,6 @@ from causal_testing.causal_testing_framework import CausalTestingFramework
 from causal_testing.discovery.abstract_discovery import Discovery
 from causal_testing.discovery.hill_climber_discovery import HillClimberDiscovery
 from causal_testing.specification.causal_dag import CausalDAG
-from causallearn.graph.GraphNode import GraphNode
 from causallearn.search.ConstraintBased.PC import pc
 from causallearn.search.PermutationBased.GRaSP import grasp
 from causallearn.search.ScoreBased.GES import ges
@@ -66,26 +66,50 @@ def load_data(data_path: str, context: bool = False, variables: list[str] = None
     return df.sample(frac=data_amount)
 
 
-def compare_pass_rates(reference_dag: CausalDAG, inferred_dag: CausalDAG, df: pd.DataFrame) -> dict:
-    reference_ctf = CausalTestingFramework(dag=reference_dag, df=df)
-    reference_dag.datatypes = df.dtypes
-    reference_ctf.test_cases = reference_dag.generate_causal_tests()
-    reference_ctf.execute_tests()
-    reference_tests = {test.name: test.outcome for test in reference_ctf.test_cases}
+def _worker_wrapper(
+    target_func: Callable,
+    queue: Queue,
+    args: tuple,
+    kwargs: dict,
+) -> None:
+    """Executes the function and passes the return value or exception to the queue."""
+    try:
+        result = target_func(*args, **kwargs)
+        queue.put((True, result))
+    except Exception as e:
+        queue.put((False, e))
 
-    inferred_ctf = CausalTestingFramework(dag=inferred_dag, df=df)
-    inferred_dag.datatypes = df.dtypes
-    inferred_ctf.test_cases = inferred_dag.generate_causal_tests()
-    inferred_ctf.execute_tests()
 
-    counts = {"pass": 0, "fail": 0, "inestimable": 0}
-    total = 0
-    for test in inferred_ctf.test_cases:
-        if test.passed:
-            counts["pass"] += 1
-            total += 1
-        if test.outcome == TestOutcome.FAIL and reference_tests.get(test.name) != TestOutcome.FAIL:
-            counts[fail] += 1
+def run_with_timeout_and_restart(func: Callable, *args, timeout: int = 1800, **kwargs) -> CausalDAG:
+    """
+    Execute a function in a separate process, restarting it when it times out.
+    This is necessary since some of the causallearn functions seem to get stuck and not terminate in reasonable time.
+
+    :param func: The function to run.
+    :param args: The positional arguments to func.
+    :param timeout: The timeout in seconds (defaults to 30 min).
+    :param kwargs: The positional arguments to func.
+    """
+    while True:
+        queue: Queue = Queue()
+        process = Process(
+            target=_worker_wrapper,
+            args=(func, queue, args, kwargs),
+        )
+        process.start()
+
+        process.join(timeout=timeout)
+
+        if process.is_alive():
+            process.terminate()
+            process.join()
+        else:
+            # Check if the process placed a result in the queue before finishing
+            if not queue.empty():
+                status, payload = queue.get()
+                if status:
+                    return payload
+                raise payload
 
 
 def run_causal_learn_discovery(technique, df: pd.DataFrame, **kwargs) -> CausalDAG:
@@ -93,9 +117,11 @@ def run_causal_learn_discovery(technique, df: pd.DataFrame, **kwargs) -> CausalD
 
     if technique == pc:
         bk = BackgroundKnowledge().add_forbidden_by_pattern(".*", r"X\d+")
-        causal_graph = technique(df.to_numpy(), background_knowledge=bk, node_names=df.columns, **kwargs)
+        causal_graph = run_with_timeout_and_restart(
+            technique, df.to_numpy(), background_knowledge=bk, node_names=df.columns, **kwargs
+        )
     else:
-        causal_graph = technique(df.to_numpy(), node_names=df.columns)
+        causal_graph = run_with_timeout_and_restart(technique, df.to_numpy(), node_names=df.columns)
 
     if technique == pc:
         pydot_graph = GraphUtils.to_pydot(pdag2dag(causal_graph.G), labels=list(df.columns))
