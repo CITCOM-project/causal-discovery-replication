@@ -3,13 +3,12 @@ name="causal_discovery_replication"
 requires-python=">=3.12"
 dependencies = [
     "causal-learn==0.1.4.8",
-    "causal-testing-framework==15.0.0",
+    "causal-testing-framework@git+https://github.com/CITCOM-project/CausalTestingFramework.git@819ab387ee87a71a51ef123948c3811a922389df",
     "cdt==0.5.23",
     "matplotlib>=3.11.1",
     "pre-commit==4.6.1",
     "rpy2==3.5.11",
     "torch==2.13.0",
-    "statsmodels==0.14.6"
 ]
 dynamic=["version"]
 

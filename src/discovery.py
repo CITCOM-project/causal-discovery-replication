@@ -2,23 +2,21 @@ import argparse
 import os
 import warnings
 from collections import Counter
-from collections.abc import Callable
-from multiprocessing import Process, Queue
 from time import time
 
 import networkx as nx
 import numpy as np
 import pandas as pd
 from causal_testing.causal_testing_framework import CausalTestingFramework
-from causal_testing.discovery.abstract_discovery import Discovery
+from causal_testing.discovery.abstract_discovery import Discovery, simple_cycle
 from causal_testing.discovery.hill_climber_discovery import HillClimberDiscovery
 from causal_testing.specification.causal_dag import CausalDAG
+from causallearn.graph.Endpoint import Endpoint
+from causallearn.graph.GeneralGraph import GeneralGraph
 from causallearn.search.ConstraintBased.PC import pc
 from causallearn.search.PermutationBased.GRaSP import grasp
 from causallearn.search.ScoreBased.GES import ges
-from causallearn.utils.GraphUtils import GraphUtils
 from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
-from causallearn.utils.PDAG2DAG import pdag2dag
 from cdt.metrics import SHD, SID
 
 warnings.filterwarnings("ignore")  # Hide warnings
@@ -66,102 +64,87 @@ def load_data(data_path: str, context: bool = False, variables: list[str] = None
     return df.sample(frac=data_amount)
 
 
-def _worker_wrapper(
-    target_func: Callable,
-    queue: Queue,
-    args: tuple,
-    kwargs: dict,
-) -> None:
-    """Executes the function and passes the return value or exception to the queue."""
-    try:
-        result = target_func(*args, **kwargs)
-        queue.put((True, result))
-    except Exception as e:
-        queue.put((False, e))
+def pdag_to_dag(pdag: GeneralGraph, labels=None) -> CausalDAG:
+    dag = CausalDAG(ignore_cycles=True)
+    dag.add_nodes_from(node.get_name() for node in pdag.get_nodes())
+    directed_edges = [
+        edge
+        for edge in pdag.get_graph_edges()
+        if (edge.get_endpoint1() == Endpoint.TAIL and edge.get_endpoint2() == Endpoint.ARROW)
+        or (edge.get_endpoint1() == Endpoint.ARROW and edge.get_endpoint2() == Endpoint.TAIL)
+    ]
+    dag.add_edges_from(map(lambda edge: (edge.get_node1().get_name(), edge.get_node2().get_name()), directed_edges))
+    if dag.is_acyclic():
+        undirected_edges = [
+            (edge.get_node1().get_name(), edge.get_node2().get_name())
+            for edge in pdag.get_graph_edges()
+            if edge not in directed_edges
+        ]
+        pos = {node: idx for idx, node in enumerate(nx.topological_sort(dag))}
+        for u, v in undirected_edges:
+            if pos[u] < pos[v]:
+                dag.add_edge(u, v)
+            else:
+                dag.add_edge(v, u)
+        if labels is None:
+            return dag
+        return nx.relabel_nodes(dag, {node.get_name(): label for node, label in zip(pdag.get_nodes(), labels)})
+    node_1, node_2 = simple_cycle(dag)[0]
+    pdag.remove_edge(pdag.get_edge(pdag.get_node(node_1), pdag.get_node(node_2)))
+    return pdag_to_dag(pdag, labels=labels)
 
 
-def run_with_timeout_and_restart(func: Callable, *args, timeout: int = 1800, **kwargs) -> CausalDAG:
-    """
-    Execute a function in a separate process, restarting it when it times out.
-    This is necessary since some of the causallearn functions seem to get stuck and not terminate in reasonable time.
-
-    :param func: The function to run.
-    :param args: The positional arguments to func.
-    :param timeout: The timeout in seconds (defaults to 30 min).
-    :param kwargs: The positional arguments to func.
-    """
-    while True:
-        queue: Queue = Queue()
-        process = Process(
-            target=_worker_wrapper,
-            args=(func, queue, args, kwargs),
-        )
-        process.start()
-
-        process.join(timeout=timeout)
-
-        if process.is_alive():
-            process.terminate()
-            process.join()
-        else:
-            # Check if the process placed a result in the queue before finishing
-            if not queue.empty():
-                status, payload = queue.get()
-                if status:
-                    return payload
-                raise payload
-
-
-def run_causal_learn_discovery(technique, df: pd.DataFrame, **kwargs) -> CausalDAG:
+def run_causal_learn_discovery(technique, df: pd.DataFrame, random_seed: int = None, **kwargs) -> CausalDAG:
+    np.random.seed(random_seed)
     start_time = time()
 
-    if technique == pc:
-        bk = BackgroundKnowledge().add_forbidden_by_pattern(".*", r"X\d+")
-        causal_graph = run_with_timeout_and_restart(
-            technique, df.to_numpy(), background_knowledge=bk, node_names=df.columns, **kwargs
-        )
-    else:
-        causal_graph = run_with_timeout_and_restart(technique, df.to_numpy(), node_names=df.columns)
+    match technique:
+        case "pc":
+            bk = BackgroundKnowledge().add_forbidden_by_pattern(".*", r"X\d+")
+            causal_graph = pc(
+                data=df.to_numpy(),
+                background_knowledge=bk,
+                node_names=df.columns,
+                random_seed=random_seed,
+                **kwargs,  # Prevents combinatorial explosion
+            ).G
 
-    if technique == pc:
-        pydot_graph = GraphUtils.to_pydot(pdag2dag(causal_graph.G), labels=list(df.columns))
-    elif technique == ges:
-        pydot_graph = GraphUtils.to_pydot(pdag2dag(causal_graph["G"]), labels=list(df.columns))
-    elif technique == grasp:
-        pydot_graph = GraphUtils.to_pydot(pdag2dag(causal_graph), labels=list(df.columns))
-    else:
-        raise ValueError(f"Unsupported technique {technique}.")
+        case "ges":
+            causal_graph = ges(
+                X=df.to_numpy(),
+                node_names=df.columns,
+            )["G"]
+        case "grasp":
+            causal_graph = grasp(
+                X=df.to_numpy(),
+                node_names=df.columns,
+            )
+        case _:
+            raise ValueError("Invalid technique.")
+
     end_time = time()
 
-    dag = CausalDAG(ignore_cycles=True)
+    dag = pdag_to_dag(causal_graph, labels=df.columns)
     if "graph" not in dag.graph:
         dag.graph["graph"] = {}
     dag.graph["graph"] |= {"time": end_time - start_time}
-
-    for node in pydot_graph.get_nodes():
-        dag.add_node(node.get_label())
-    for edge in pydot_graph.get_edges():
-        [source] = pydot_graph.get_node(str(edge.get_source()))
-        [target] = pydot_graph.get_node(str(edge.get_destination()))
-        dag.add_edge(source.get_label(), target.get_label())
+    assert dag.is_acyclic()
     return dag
 
 
-def run_ctf_discovery(
-    technique, df: pd.DataFrame, random_seed: int = None, initial_individual: CausalDAG = None, **kwargs
-) -> CausalDAG:
+def run_ctf_discovery(df: pd.DataFrame, random_seed: int = None, **kwargs) -> CausalDAG:
     # Need to reset index to allow for multiple files having the same index (i.e. starting at zero).
     # Otherwise you end up with duplicate indices, which causes problems further down the line
     start_time = time()
     if random_seed is None:
         random_seed = start_time
-    discover = technique(
+    discover = HillClimberDiscovery(
         df=df,
         random_seed=random_seed,
         exclude_edges=[(".*", r"X\d+")] + kwargs.pop("exclude_edges", []),
         **kwargs,
     )
-    dag = discover.discover(individual=initial_individual)
+    dag = discover.discover()
     end_time = time()
 
     if "graph" not in dag.graph:

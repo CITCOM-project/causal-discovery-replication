@@ -56,7 +56,6 @@ def main():
 
     if args.technique not in techniques:
         raise ValueError(f"Unsupported technique {args.technique}. Must be one of {list(techniques)}.")
-    technique = techniques[args.technique]
 
     n_edges = EDGES_PER_NODE * args.nodes
     p_edge = min(n_edges / ((args.nodes * (args.nodes - 1)) / 2), 0.99)
@@ -71,10 +70,11 @@ def main():
 
     try:
         if args.technique in ["pc", "ges", "grasp"]:
-            inferred_dag = run_causal_learn_discovery(technique=technique, df=data)
+            inferred_dag = run_causal_learn_discovery(
+                technique=args.technique, df=data, random_seed=args.seed, timeout=60
+            )
         else:
             inferred_dag = run_ctf_discovery(
-                technique,
                 df=data,
                 random_seed=args.seed,
             )
