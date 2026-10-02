@@ -2,6 +2,7 @@
 __pycache__/
 results/
 results_synthetic/
+reference_synthetic/
 figures/
 apptainer.sif
 *.zip

@@ -7,17 +7,14 @@ from time import time
 import networkx as nx
 import numpy as np
 import pandas as pd
+from castle.algorithms import Notears
 from causal_testing.causal_testing_framework import CausalTestingFramework
 from causal_testing.discovery.abstract_discovery import Discovery, simple_cycle
 from causal_testing.discovery.hill_climber_discovery import HillClimberDiscovery
 from causal_testing.specification.causal_dag import CausalDAG
-from causallearn.graph.Endpoint import Endpoint
-from causallearn.graph.GeneralGraph import GeneralGraph
 from causallearn.search.ConstraintBased.PC import pc
-from causallearn.search.PermutationBased.GRaSP import grasp
 from causallearn.search.ScoreBased.GES import ges
-from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
-from cdt.metrics import SHD, SID
+from cdt.metrics import SHD, SID, precision_recall
 
 warnings.filterwarnings("ignore")  # Hide warnings
 
@@ -25,7 +22,7 @@ techniques = {
     "HillClimberDiscovery": HillClimberDiscovery,
     "pc": pc,
     "ges": ges,
-    "grasp": grasp,
+    "notears": Notears,
 }
 
 
@@ -64,77 +61,87 @@ def load_data(data_path: str, context: bool = False, variables: list[str] = None
     return df.sample(frac=data_amount)
 
 
-def pdag_to_dag(pdag: GeneralGraph, labels=None) -> CausalDAG:
+def pdag_to_dag(pdag: CausalDAG) -> CausalDAG:
+    directed_edges = []
+    undirected_edges = set()
+
+    for u, v in pdag.edges():
+        if pdag.has_edge(v, u):
+            # Sort node names/indices to avoid adding (u,v) and (v,u)
+            undirected_edges.add(tuple(sorted([u, v])))
+        else:
+            directed_edges.append((u, v))
+
     dag = CausalDAG(ignore_cycles=True)
-    dag.add_nodes_from(node.get_name() for node in pdag.get_nodes())
-    directed_edges = [
-        edge
-        for edge in pdag.get_graph_edges()
-        if (edge.get_endpoint1() == Endpoint.TAIL and edge.get_endpoint2() == Endpoint.ARROW)
-        or (edge.get_endpoint1() == Endpoint.ARROW and edge.get_endpoint2() == Endpoint.TAIL)
-    ]
-    dag.add_edges_from(map(lambda edge: (edge.get_node1().get_name(), edge.get_node2().get_name()), directed_edges))
+    dag.add_nodes_from(pdag.nodes)
+    dag.add_edges_from(directed_edges)
+
     if dag.is_acyclic():
-        undirected_edges = [
-            (edge.get_node1().get_name(), edge.get_node2().get_name())
-            for edge in pdag.get_graph_edges()
-            if edge not in directed_edges
-        ]
-        pos = {node: idx for idx, node in enumerate(nx.topological_sort(dag))}
+        topo_order = {node: rank for rank, node in enumerate(nx.topological_sort(dag))}
         for u, v in undirected_edges:
-            if pos[u] < pos[v]:
+            if topo_order[u] < topo_order[v]:
                 dag.add_edge(u, v)
             else:
                 dag.add_edge(v, u)
-        if labels is None:
-            return dag
-        return nx.relabel_nodes(dag, {node.get_name(): label for node, label in zip(pdag.get_nodes(), labels)})
+        return dag
     node_1, node_2 = simple_cycle(dag)[0]
-    pdag.remove_edge(pdag.get_edge(pdag.get_node(node_1), pdag.get_node(node_2)))
-    return pdag_to_dag(pdag, labels=labels)
+    pdag.remove_edge(node_1, node_2)
+    return pdag_to_dag(pdag)
 
 
-def run_causal_learn_discovery(technique, df: pd.DataFrame, random_seed: int = None, **kwargs) -> CausalDAG:
-    np.random.seed(random_seed)
+def run_causal_learn_discovery(technique, df: pd.DataFrame) -> CausalDAG:
     start_time = time()
+    try:
+        match technique:
+            case "pc":
+                causal_graph = pc(data=df.to_numpy(), node_names=df.columns, max_k=6).G
+            case "ges":
+                causal_graph = ges(
+                    X=df.to_numpy(),
+                    node_names=df.columns,
+                )["G"]
+            case _:
+                raise ValueError(f"Invalid technique {technique}.")
 
-    match technique:
-        case "pc":
-            bk = BackgroundKnowledge().add_forbidden_by_pattern(".*", r"X\d+")
-            causal_graph = pc(
-                data=df.to_numpy(),
-                background_knowledge=bk,
-                node_names=df.columns,
-                random_seed=random_seed,
-                **kwargs,  # Prevents combinatorial explosion
-            ).G
-
-        case "ges":
-            causal_graph = ges(
-                X=df.to_numpy(),
-                node_names=df.columns,
-            )["G"]
-        case "grasp":
-            causal_graph = grasp(
-                X=df.to_numpy(),
-                node_names=df.columns,
-            )
-        case _:
-            raise ValueError("Invalid technique.")
+        pdag = CausalDAG(ignore_cycles=True)
+        pdag.add_nodes_from(df.columns)
+        pdag.add_edges_from(
+            map(lambda edge: (edge.get_node1().get_name(), edge.get_node2().get_name()), causal_graph.get_graph_edges())
+        )
+        dag = pdag_to_dag(pdag)
+    except ValueError as e:
+        # If the discovery algorithm fails, we know no more than the variables we have
+        dag = CausalDAG(ignore_cycles=True)
+        dag.add_nodes_from(df.columns)
+        dag.graph["graph"] = dag.graph.get("graph", {}) | {"error": str(e)}
 
     end_time = time()
 
-    dag = pdag_to_dag(causal_graph, labels=df.columns)
-    if "graph" not in dag.graph:
-        dag.graph["graph"] = {}
-    dag.graph["graph"] |= {"time": end_time - start_time}
+    dag.graph["graph"] = dag.graph.get("graph", {}) | {"time": end_time - start_time}
+    assert dag.is_acyclic()
+    return dag
+
+
+def run_gcastle_discovery(technique, df: pd.DataFrame) -> CausalDAG:
+    start_time = time()
+    model = techniques[technique]()
+    model.learn(df)
+
+    pdag = CausalDAG(ignore_cycles=True)
+    pdag.add_nodes_from(df.columns)
+    for i, u in enumerate(df.columns):
+        for j, v in enumerate(df.columns):
+            if model.causal_matrix[i, j] != 0:
+                pdag.add_edge(u, v)
+    dag = pdag_to_dag(pdag)
+    end_time = time()
+
+    dag.graph["graph"] = dag.graph.get("graph", {}) | {"time": end_time - start_time}
     assert dag.is_acyclic()
     return dag
 
 
 def run_ctf_discovery(df: pd.DataFrame, random_seed: int = None, **kwargs) -> CausalDAG:
-    # Need to reset index to allow for multiple files having the same index (i.e. starting at zero).
-    # Otherwise you end up with duplicate indices, which causes problems further down the line
     start_time = time()
     if random_seed is None:
         random_seed = start_time
@@ -147,11 +154,8 @@ def run_ctf_discovery(df: pd.DataFrame, random_seed: int = None, **kwargs) -> Ca
     dag = discover.discover()
     end_time = time()
 
-    if "graph" not in dag.graph:
-        dag.graph["graph"] = {}
-
-    dag.graph["graph"] |= {"time": end_time - start_time, "seed": random_seed}
-
+    dag.graph["graph"] = dag.graph.get("graph", {}) | {"time": end_time - start_time}
+    assert dag.is_acyclic()
     return dag
 
 
@@ -203,6 +207,7 @@ def dag_confusion_matrix(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
 
 
 def dag_difference_metrics(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
+    print(precision_recall(reference_dag, inferred_dag))
     return {
         "true_edges": len(reference_dag.edges),
         "inferred_edges": len(inferred_dag.edges),

@@ -59,21 +59,23 @@ def read_data(data_path: str = None) -> pd.DataFrame:
         #         for metric in ["sensitivity", "specificity", "bcr"]
         #     ],
         # ] = 0
+        data = data.sort_values(["technique", "seed"])
         if data_path:
             data.to_csv(data_path)
 
     return data
 
 
-def plot_accuracy(df: pd.DataFrame, column: str):
+def plot_accuracy(df: pd.DataFrame, column: str, label: str = None):
     _, ax = plt.subplots()
     ax.boxplot(
         df.loc[~df[column].isnull()].groupby("technique")[column].apply(list),
         tick_labels=df.loc[~df[column].isnull()].groupby("technique").groups.keys(),
     )
     ax.tick_params("x", rotation=45, rotation_mode="xtick")
-    ax.set_title(column.capitalize())
-    ax.set_ylim(0, 1)
+    ax.set_ylabel(label if label else column.capitalize().replace("_", " "))
+    if df[column].between(0, 1).all():
+        ax.set_ylim(-0.01, 1.01)
     plt.tight_layout()
     plt.savefig(f"figures/{column}.png")
     plt.close()
@@ -117,6 +119,12 @@ if __name__ == "__main__":
         os.mkdir("figures")
     df = read_data("data.csv")
 
+    # Check we have all the results
+    for technique, group in df.groupby("technique"):
+        for seed in range(250):
+            if seed not in map(int, group["seed"]):
+                print(technique, seed)
+
     df["normalised_pass"] = df["pass"] / df["reference_pass"]
 
     # with open("synthetic_configurations.txt") as f:
@@ -133,38 +141,41 @@ if __name__ == "__main__":
     df["normalised_structural_hamming"] = df["structural_hamming"] / (((df["nodes"] * (df["nodes"] - 1)) / 2))
     df["normalised_structural_intervention"] = df["structural_intervention"] / (((df["nodes"] * (df["nodes"] - 1))))
 
-    plot_accuracy(df, "pass")
+    df["pass_rate"] = df["pass"] * 100
+
+    plot_accuracy(df, "pass_rate", "Pass Rate (%)")
     plot_accuracy(df, "fail")
     plot_accuracy(df, "inestimable")
     plot_accuracy(df, "directional_sensitivity")
     plot_accuracy(df, "non_directional_sensitivity")
     plot_accuracy(df, "directional_specificity")
     plot_accuracy(df, "non_directional_specificity")
-    plot_accuracy(df, "directional_bcr")
+    plot_accuracy(df, "directional_bcr", "Directional BCR")
     plot_accuracy(df, "non_directional_bcr")
     plot_accuracy(df, "normalised_structural_intervention")
     plot_accuracy(df, "normalised_structural_hamming")
+    plot_accuracy(df, "time", "Runtime (s)")
 
-    scatter(df, "directional_sensitivity", "pass")
-    scatter(df, "directional_specificity", "pass")
-    scatter(df, "non_directional_sensitivity", "pass")
-    scatter(df, "non_directional_specificity", "pass")
-    scatter(df, "directional_bcr", "pass")
-    scatter(df, "non_directional_bcr", "pass")
+    scatter(df, "directional_sensitivity", "pass_rate")
+    scatter(df, "directional_specificity", "pass_rate")
+    scatter(df, "non_directional_sensitivity", "pass_rate")
+    scatter(df, "non_directional_specificity", "pass_rate")
+    scatter(df, "directional_bcr", "pass_rate")
+    scatter(df, "non_directional_bcr", "pass_rate")
 
-    scatter(df, "normalised_structural_intervention", "pass")
-    scatters(df, "technique", "normalised_structural_intervention", "pass")
-    scatters(df, "technique", "normalised_structural_hamming", "pass")
-    scatters(df, "technique", "normalised_edit_distance", "pass")
+    scatter(df, "normalised_structural_intervention", "pass_rate")
+    scatters(df, "technique", "normalised_structural_intervention", "pass_rate")
+    scatters(df, "technique", "normalised_structural_hamming", "pass_rate")
+    scatters(df, "technique", "normalised_edit_distance", "pass_rate")
     #
     # # scatter(df, "nodes", "edit_distance")
     # # scatter(df, "nodes", "structural_hamming")
     #
-    scatters(df, "technique", "directional_bcr", "pass")
-    scatters(df, "technique", "data_amount", "pass")
-    scatters(df, "technique", "nodes", "pass")
+    scatters(df, "technique", "directional_bcr", "pass_rate")
+    scatters(df, "technique", "data_amount", "pass_rate")
+    scatters(df, "technique", "nodes", "pass_rate")
     # scatters(df, "technique", "edge_probability", "pass")
-    scatters(df, "technique", "conditional_probability", "pass")
+    scatters(df, "technique", "conditional_probability", "pass_rate")
 
     scatters(df, "technique", "data_amount", "normalised_structural_intervention")
     scatters(df, "technique", "data_amount", "normalised_structural_hamming")

@@ -9,6 +9,7 @@ from discovery import (
     evaluate_dag,
     run_causal_learn_discovery,
     run_ctf_discovery,
+    run_gcastle_discovery,
     techniques,
 )
 from program_generation import dag_and_data
@@ -68,21 +69,15 @@ def main():
         seed=args.seed,
     )
 
-    try:
-        if args.technique in ["pc", "ges", "grasp"]:
-            inferred_dag = run_causal_learn_discovery(
-                technique=args.technique, df=data, random_seed=args.seed, timeout=60
-            )
-        else:
-            inferred_dag = run_ctf_discovery(
-                df=data,
-                random_seed=args.seed,
-            )
-
-    except ValueError as e:
-        inferred_dag = nx.DiGraph()
-        inferred_dag.add_nodes_from(reference_dag.nodes)
-        inferred_dag.graph["graph"] = {"error": str(e)}
+    if args.technique == "HillClimberDiscovery":
+        inferred_dag = run_ctf_discovery(
+            df=data,
+            random_seed=args.seed,
+        )
+    elif args.technique == "notears":
+        inferred_dag = run_gcastle_discovery(technique=args.technique, df=data)
+    else:
+        inferred_dag = run_causal_learn_discovery(technique=args.technique, df=data)
 
     inferred_dag.graph["graph"] |= (
         vars(args)
