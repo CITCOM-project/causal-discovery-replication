@@ -207,7 +207,6 @@ def dag_confusion_matrix(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
 
 
 def dag_difference_metrics(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
-    print(precision_recall(reference_dag, inferred_dag))
     return {
         "true_edges": len(reference_dag.edges),
         "inferred_edges": len(inferred_dag.edges),

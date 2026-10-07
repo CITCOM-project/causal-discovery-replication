@@ -262,7 +262,9 @@ def write_statement_stack_to_python_file(
     return namespace[program_name]
 
 
-def dag_and_data(n_nodes: int, p_edge: float, p_conditional: float, num_points: int, seed: int):
+def dag_and_data(
+    n_nodes: int, p_edge: float, p_conditional: float, num_points: int, seed: int, standardise: bool = True
+):
     """
     Generate a causal DAG and associated dataset.
     """
@@ -279,5 +281,9 @@ def dag_and_data(n_nodes: int, p_edge: float, p_conditional: float, num_points: 
         scale=0.10 * (data[output_columns].max() - data[output_columns].min()),
         size=(len(data), len(output_columns)),
     )
+
+    if standardise:
+        for col in data:
+            data[col] = (data[col] - data[col].mean()) / data[col].std()
 
     return dag, data
