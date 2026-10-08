@@ -192,7 +192,6 @@ def evaluate_dag(dag: nx.DiGraph, df: pd.DataFrame):
         k.name.lower(): v / len(framework.test_cases)
         for k, v in Counter([test.result.outcome for test in framework.test_cases]).items()
     }
-    framework.save_results("/tmp/results.json")
     return counts
 
 
@@ -216,64 +215,3 @@ def dag_difference_metrics(reference_dag: nx.DiGraph, inferred_dag: nx.DiGraph):
         "structural_intervention": SID(reference_dag, inferred_dag),
         "edit_distance": next(nx.algorithms.similarity.optimize_graph_edit_distance(reference_dag, inferred_dag)),
     }
-
-
-if __name__ == "__main__":
-    args = parse_args()
-
-    if args.technique not in techniques:
-        raise ValueError(f"Unsupported technique {args.technique}. Must be one of {list(techniques)}.")
-    technique = techniques[args.technique]
-
-    reference_dag = CausalDAG(args.reference_dag)
-
-    data = load_data(
-        args.data,
-        context=args.context,
-        variables=list(reference_dag.nodes()),
-        data_amount=args.data_amount,
-    )
-
-    try:
-        if issubclass(technique, Discovery):
-            inferred_dag = run_ctf_discovery(technique, df=data, context=args.context, random_seed=args.seed)
-        else:
-            inferred_dag = run_causal_learn_discovery(
-                technique,
-                df=data,
-            )
-
-    except ValueError as e:
-        inferred_dag = nx.DiGraph()
-        inferred_dag.nodes = reference_dag.nodes
-        inferred_dag.graph["graph"] = {"error": str(e)}
-
-    inferred_dag.graph["graph"] |= (
-        {
-            "technique": args.technique,
-            "expert_knowledge_amount": args.expert_knowledge_amount,
-            "data_points": len(data),
-            "pass": 0,
-            "fail": 0,
-            "inestimable": 0,
-        }
-        | {f"directional_{key}": len(value) for key, value in dag_confusion_matrix(reference_dag, inferred_dag).items()}
-        | {
-            f"non_directional_{key}": len(value)
-            for key, value in dag_confusion_matrix(reference_dag.to_undirected(), inferred_dag.to_undirected()).items()
-        }
-        | dag_difference_metrics(reference_dag, inferred_dag)
-    )
-    try:
-        # Do this as a separate step in case the DAG is cyclic
-        inferred_dag.graph["graph"] |= evaluate_dag(inferred_dag, data)
-
-    except (nx.HasACycle, ValueError) as e:
-        if "error" not in inferred_dag.graph["graph"]:
-            inferred_dag.graph["graph"] = {"error": str(e)}
-
-    # output
-    root, _ = os.path.split(args.output)
-    if not os.path.exists(root):
-        os.makedirs(root)
-    nx.drawing.nx_pydot.write_dot(inferred_dag, args.output)

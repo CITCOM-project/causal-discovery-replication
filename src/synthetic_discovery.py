@@ -23,17 +23,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--output", help="Path for output DAG file (.dot)", required=True)
     parser.add_argument("-r", "--reference-output", help="Path for reference DAG file (.dot)", required=True)
-    parser.add_argument(
-        "-t", "--technique", help="The algorithm to run. One of GES, HillClimbSearch, PC", required=True
-    )
-
-    parser.add_argument(
-        "-k",
-        "--expert-knowledge-amount",
-        type=float,
-        help="The proportion of edges and non-edges to be given to the discovery algorithm. (Between 0 and 1)",
-        default=0,
-    )
+    parser.add_argument("-t", "--technique", help=f"The algorithm to run. One of {list(techniques)}", required=True)
     parser.add_argument(
         "-D", "--data-amount", type=int, help="The number of the data points to generate.", required=True
     )
