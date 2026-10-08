@@ -14,7 +14,10 @@ from discovery import (
 )
 
 
-def get_valid_columns(file_path):
+def get_valid_columns(file_path: str) -> list[str]:
+    """
+    Filter out irrelevant and non-usable columns.
+    """
     df = pd.read_csv(file_path)
 
     valid_cols = [
@@ -32,7 +35,10 @@ def get_valid_columns(file_path):
 
 
 def main():
-    data_file_variables = {f: get_valid_columns(f) for f in glob("data/*.csv")}
+    """
+    Run the discovery.
+    """
+    data_file_variables = {f: get_valid_columns(f) for f in sorted(glob("data/*.csv"))}
 
     for seed in range(30):
         for technique in techniques:
@@ -47,6 +53,12 @@ def main():
                 elif technique == "notears":
                     inferred_dag = run_gcastle_discovery(technique=technique, df=data)
                 else:
+                    for col in data:
+                        if pd.api.types.is_bool_dtype(data[col]):
+                            data[col] = data[col].astype(int)
+                        if not pd.api.types.is_numeric_dtype(data[col]):
+                            data[col] = data[col].apply({value: inx for inx, value in enumerate(data[col].unique())})
+
                     inferred_dag = run_causal_learn_discovery(technique=technique, df=data)
 
                 config_args = {
