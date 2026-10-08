@@ -3,7 +3,7 @@ name="causal_discovery_replication"
 requires-python=">=3.12"
 dependencies = [
     "causal-learn==0.1.4.8",
-    "causal-testing-framework@git+https://github.com/CITCOM-project/CausalTestingFramework.git@819ab387ee87a71a51ef123948c3811a922389df",
+    "causal-testing-framework==15.1.0",
     "cdt==0.5.23",
     "gcastle>=1.0.4",
     "matplotlib>=3.11.1",
