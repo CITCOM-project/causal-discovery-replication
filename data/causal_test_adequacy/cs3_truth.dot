@@ -1,9 +1,0 @@
-digraph DAG {
-    rankdir=LR;
-    mortality_prob    -> total_infected;
-    recovery_time     -> total_infected;
-    mortality_time    -> total_infected;
-    transmission_prob -> total_infected;
-    encounter_rate    -> total_infected;
-    incubation_time   -> total_infected;
-}

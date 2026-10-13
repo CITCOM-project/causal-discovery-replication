@@ -1,1 +1,10 @@
 *.egg-info/
+__pycache__/
+results/
+results_synthetic/
+reference_synthetic/
+results_real/
+figures/
+apptainer.sif
+*.zip
+data.csv

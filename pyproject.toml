@@ -2,6 +2,27 @@
 name="causal_discovery_replication"
 requires-python=">=3.12"
 dependencies = [
-    "causal_testing_framework @ git+https://github.com/CITCOM-project/CausalTestingFramework@22429e6dd7463ce65a7563fc9fdaf4c1df4b7998"
+    "causal-learn==0.1.4.8",
+    "causal-testing-framework==15.1.0",
+    "cdt==0.5.23",
+    "gcastle>=1.0.4",
+    "matplotlib>=3.11.1",
+    "pre-commit==4.6.1",
+    "rpy2==3.5.11",
+    "torch==2.13.0",
 ]
 dynamic=["version"]
+
+[tool.black]
+# https://github.com/psf/black
+line-length = 120
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.pyproject2conda.dependencies]
+torch = { pip = true }
+cdt = { pip = true }
+causal-learn = { pip = true }
