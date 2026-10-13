@@ -374,11 +374,11 @@ def mutated_dag_and_data(
         if edge in dag.edges():
             mutated_dag.remove_edge(*edge)
             function = remove_term(function, *edge)
-            test = lambda dag: edge in dag.edges
+            operation = "removed"
         else:
             mutated_dag.add_edge(*edge)
             function = add_term(function, *edge)
-            test = lambda dag: edge not in dag.edges
+            operation = "added"
         if not nx.is_directed_acyclic_graph(mutated_dag) or any(
             dag.in_degree(node) == 0 for node in dag.nodes if node not in inputs
         ):
@@ -387,7 +387,7 @@ def mutated_dag_and_data(
         namespace = {"np": np}
         exec(function, namespace)
 
-        yield test, mutated_dag, generate_data(
+        yield operation, edge, mutated_dag, generate_data(
             function=namespace["program"],
             inputs=inputs,
             num_points=num_points,

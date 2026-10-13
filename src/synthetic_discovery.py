@@ -2,6 +2,7 @@ import argparse
 import os
 
 import networkx as nx
+import pandas as pd
 
 from discovery import (
     dag_confusion_matrix,
@@ -13,6 +14,8 @@ from discovery import (
     techniques,
 )
 from program_generation import dag_and_data
+from causal_testing.causal_testing_framework import CausalTestingFramework
+from causal_testing.specification.causal_dag import CausalDAG
 
 # We set the number of edges per node to 2 to reflect the fact that most software errors come from small
 # numbers of interacting variables
@@ -53,6 +56,21 @@ def infer_dag(args, reference_dag, data):
     return inferred_dag
 
 
+def killed_mutant(mutated_edge: tuple[str, str], inferred_dag: CausalDAG, df: pd.DataFrame):
+    """
+    Check whether the corresponding test case for a mutated edge failed, killing the mutant.
+    """
+    inferred_dag.datatypes = df.dtypes
+    ctf = CausalTestingFramework(dag=inferred_dag, df=df, test_cases=inferred_dag.generate_causal_tests())
+    ctf.run_tests(silent=True)
+    treatment, outcome = mutated_edge
+    return any(
+        not test.result.passed
+        for test in ctf.test_cases
+        if test.treatment_variable == treatment and test.outcome_variable == outcome
+    )
+
+
 def main():
     args = parse_args()
 
@@ -86,6 +104,10 @@ def main():
             "pass": 0,
             "fail": 0,
             "inestimable": 0,
+            "killed_mutants": sum(
+                killed_mutant(edge, inferred_dag, mutated_data)
+                for (operation, edge, mutated_dag, mutated_data) in mutants
+            ),
         }
         | {f"directional_{key}": len(value) for key, value in dag_confusion_matrix(reference_dag, inferred_dag).items()}
         | {
@@ -104,14 +126,6 @@ def main():
             inferred_dag.graph["graph"] = vars(args) | {"error": str(e)}
 
     nx.drawing.nx_pydot.write_dot(inferred_dag, args.output)
-
-    for inx, (test, mutated_dag, mutated_data) in enumerate(mutants):
-        inferred_dag = infer_dag(args, mutated_dag, mutated_data)
-        inferred_dag.graph["graph"] = vars(args) | {"killed_mutant": test(inferred_dag)}
-        root = args.output.replace(".dot", "")
-        if not os.path.exists(root):
-            os.makedirs(root)
-        nx.drawing.nx_pydot.write_dot(inferred_dag, os.path.join(root, f"mutated_{inx}.dot"))
 
 
 if __name__ == "__main__":
