@@ -73,6 +73,10 @@ def main():
         seed=args.seed,
         max_mutants=3,
     )
+    for output in [args.output, args.reference_output]:
+        root, _ = os.path.split(output)
+        if not os.path.exists(root):
+            os.makedirs(root)
     nx.drawing.nx_pydot.write_dot(reference_dag, args.reference_output)
 
     inferred_dag = infer_dag(args, reference_dag, raw_data)
@@ -99,10 +103,6 @@ def main():
         if "error" not in inferred_dag.graph["graph"]:
             inferred_dag.graph["graph"] = vars(args) | {"error": str(e)}
 
-    for output in [args.output, args.reference_output]:
-        root, _ = os.path.split(output)
-        if not os.path.exists(root):
-            os.makedirs(root)
     nx.drawing.nx_pydot.write_dot(inferred_dag, args.output)
 
     for inx, (test, mutated_dag, mutated_data) in enumerate(mutants):
