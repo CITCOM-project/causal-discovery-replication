@@ -39,6 +39,20 @@ def parse_args():
     return parser.parse_args()
 
 
+def infer_dag(args, reference_dag, data):
+    if args.technique == "HillClimberDiscovery":
+        inferred_dag = run_ctf_discovery(
+            df=data,
+            random_seed=args.seed,
+        )
+    elif args.technique == "notears":
+        inferred_dag = run_gcastle_discovery(technique=args.technique, df=data)
+    else:
+        inferred_dag = run_causal_learn_discovery(technique=args.technique, df=data)
+
+    return inferred_dag
+
+
 def main():
     args = parse_args()
 
@@ -51,24 +65,17 @@ def main():
     n_edges = EDGES_PER_NODE * args.nodes
     p_edge = min(n_edges / ((args.nodes * (args.nodes - 1)) / 2), 0.99)
 
-    reference_dag, data = dag_and_data(
+    reference_dag, raw_data, mutants = dag_and_data(
         n_nodes=args.nodes,
         p_edge=p_edge,
         p_conditional=args.conditional_probability,
         num_points=args.data_amount,
         seed=args.seed,
+        max_mutants=3,
     )
+    nx.drawing.nx_pydot.write_dot(reference_dag, args.reference_output)
 
-    if args.technique == "HillClimberDiscovery":
-        inferred_dag = run_ctf_discovery(
-            df=data,
-            random_seed=args.seed,
-        )
-    elif args.technique == "notears":
-        inferred_dag = run_gcastle_discovery(technique=args.technique, df=data)
-    else:
-        inferred_dag = run_causal_learn_discovery(technique=args.technique, df=data)
-
+    inferred_dag = infer_dag(args, reference_dag, raw_data)
     inferred_dag.graph["graph"] |= (
         vars(args)
         | {
@@ -85,20 +92,26 @@ def main():
     )
     try:
         # Do this as a separate step in case the DAG is cyclic - it shouldn't be!
-        inferred_dag.graph["graph"] |= {"reference_" + k: v for k, v in evaluate_dag(reference_dag, data).items()}
-        inferred_dag.graph["graph"] |= evaluate_dag(inferred_dag, data)
+        inferred_dag.graph["graph"] |= {"reference_" + k: v for k, v in evaluate_dag(reference_dag, raw_data).items()}
+        inferred_dag.graph["graph"] |= evaluate_dag(inferred_dag, raw_data)
 
     except (nx.HasACycle, ValueError) as e:
         if "error" not in inferred_dag.graph["graph"]:
             inferred_dag.graph["graph"] = vars(args) | {"error": str(e)}
 
-    # output
     for output in [args.output, args.reference_output]:
         root, _ = os.path.split(output)
         if not os.path.exists(root):
             os.makedirs(root)
     nx.drawing.nx_pydot.write_dot(inferred_dag, args.output)
-    nx.drawing.nx_pydot.write_dot(reference_dag, args.reference_output)
+
+    for inx, (test, mutated_dag, mutated_data) in enumerate(mutants):
+        inferred_dag = infer_dag(args, mutated_dag, mutated_data)
+        inferred_dag.graph["graph"] = vars(args) | {"killed_mutant": test(inferred_dag)}
+        root = args.output.replace(".dot", "")
+        if not os.path.exists(root):
+            os.makedirs(root)
+        nx.drawing.nx_pydot.write_dot(inferred_dag, os.path.join(root, f"mutated_{inx}.dot"))
 
 
 if __name__ == "__main__":

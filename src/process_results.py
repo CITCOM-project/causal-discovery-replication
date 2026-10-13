@@ -16,10 +16,13 @@ def read_file(dag_path):
     split = os.path.normpath(os.path.splitext(dag_path)[0]).split(os.sep)
     dag = pydot.graph_from_dot_file(dag_path)[0]
     configuration = {
-        k: float(v) if k not in ["technique", "error", "output", "reference_output", "hill_climb"] else v
+        k: float(v) if k not in ["technique", "error", "output", "reference_output", "killed_mutant"] else v
         for k, v in dag.get_attributes().items()
     }
     configuration["dag_path"] = dag_path
+    configuration["mutated"] = "mutated" in dag_path
+    if "killed_mutant" in configuration:
+        configuration["killed_mutant"] = configuration["killed_mutant"] == "true"
 
     return configuration
 
@@ -118,6 +121,12 @@ if __name__ == "__main__":
     if not os.path.exists("figures"):
         os.mkdir("figures")
     df = read_data("data.csv")
+
+    df_mutated = df.loc[df["mutated"]]
+    df = df.loc[~df["mutated"]]
+
+    print(df_mutated)
+    print(df_mutated.groupby("technique")["killed_mutant"].sum())
 
     # Check we have all the results
     for technique, group in df.groupby("technique"):
