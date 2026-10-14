@@ -67,7 +67,7 @@ def killed_mutants(inferred_dag: CausalDAG, mutants, reference_tests: dict[str, 
     Ambiguous mutants represent tests that failed on both the raw data and the mutated data, thus technically killing
     the mutant, but not in a way that tells us much.
     """
-    result = {"tested_mutants": 0, "killed_mutants": 0, "ambiguous_mutants": 0}
+    result = {"tested_mutants": 0, "killed_mutants": 0, "ambiguous_mutants": 0, "total_mutants": 0}
 
     for (treatment, outcome), mutated_data in mutants:
         ctf = CausalTestingFramework(dag=inferred_dag, df=mutated_data, test_cases=inferred_dag.generate_causal_tests())
@@ -81,6 +81,7 @@ def killed_mutants(inferred_dag: CausalDAG, mutants, reference_tests: dict[str, 
             test for test in ctf.test_cases if test.treatment_variable == treatment and test.outcome_variable == outcome
         ]
 
+        result["tested_mutants"] += 1
         result["tested_mutants"] += int(len(reference_test) > 0 and len(mutant_test) > 0)
         result["killed_mutants"] += int(
             len(reference_test) > 0
