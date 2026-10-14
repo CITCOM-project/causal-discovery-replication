@@ -16,7 +16,7 @@ def read_file(dag_path):
     split = os.path.normpath(os.path.splitext(dag_path)[0]).split(os.sep)
     dag = pydot.graph_from_dot_file(dag_path)[0]
     configuration = {
-        k: float(v) if k not in ["technique", "error", "output", "reference_output", "killed_mutant"] else v
+        k: float(v) if k not in ["technique", "error", "output", "reference_output"] else v
         for k, v in dag.get_attributes().items()
     }
     configuration["dag_path"] = dag_path
@@ -122,17 +122,14 @@ if __name__ == "__main__":
         os.mkdir("figures")
     df = read_data("data.csv")
 
-    df_mutated = df.loc[df["mutated"]]
-    df = df.loc[~df["mutated"]]
-
-    print(df_mutated)
-    print(df_mutated.groupby("technique")["killed_mutant"].sum())
-
     # Check we have all the results
     for technique, group in df.groupby("technique"):
         for seed in range(250):
             if seed not in map(int, group["seed"]):
                 print(technique, seed)
+
+    print(df.groupby("technique")["killed_mutants"].sum())
+    print(df.groupby("technique")["tested_mutants"].sum())
 
     df["normalised_pass"] = df["pass"] / df["reference_pass"]
 

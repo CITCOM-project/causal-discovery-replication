@@ -72,7 +72,7 @@ def pdag_to_dag(pdag: CausalDAG) -> CausalDAG:
         else:
             directed_edges.append((u, v))
 
-    dag = CausalDAG(ignore_cycles=True)
+    dag = CausalDAG(ignore_cycles=True, datatypes=pdag.datatypes)
     dag.add_nodes_from(pdag.nodes)
     dag.add_edges_from(directed_edges)
 
@@ -84,6 +84,8 @@ def pdag_to_dag(pdag: CausalDAG) -> CausalDAG:
             else:
                 dag.add_edge(v, u)
         return dag
+
+    dag.graph["graph"] = dag.graph.get("graph", {}) | {"cyclic": True}
     node_1, node_2 = simple_cycle(dag)[0]
     pdag.remove_edge(node_1, node_2)
     return pdag_to_dag(pdag)
@@ -103,7 +105,7 @@ def run_causal_learn_discovery(technique, df: pd.DataFrame) -> CausalDAG:
             case _:
                 raise ValueError(f"Invalid technique {technique}.")
 
-        pdag = CausalDAG(ignore_cycles=True)
+        pdag = CausalDAG(ignore_cycles=True, datatypes=df.dtypes)
         pdag.add_nodes_from(df.columns)
         pdag.add_edges_from(
             map(lambda edge: (edge.get_node1().get_name(), edge.get_node2().get_name()), causal_graph.get_graph_edges())
@@ -111,7 +113,7 @@ def run_causal_learn_discovery(technique, df: pd.DataFrame) -> CausalDAG:
         dag = pdag_to_dag(pdag)
     except ValueError as e:
         # If the discovery algorithm fails, we know no more than the variables we have
-        dag = CausalDAG(ignore_cycles=True)
+        dag = CausalDAG(ignore_cycles=True, datatypes=df.dtypes)
         dag.add_nodes_from(df.columns)
         dag.graph["graph"] = dag.graph.get("graph", {}) | {"error": str(e)}
 
@@ -127,7 +129,7 @@ def run_gcastle_discovery(technique, df: pd.DataFrame) -> CausalDAG:
     model = techniques[technique]()
     model.learn(df)
 
-    pdag = CausalDAG(ignore_cycles=True)
+    pdag = CausalDAG(ignore_cycles=True, datatypes=df.dtypes)
     pdag.add_nodes_from(df.columns)
     for i, u in enumerate(df.columns):
         for j, v in enumerate(df.columns):

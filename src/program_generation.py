@@ -139,8 +139,8 @@ def generate_dag(n_nodes: int, p_edge: float, seed: int = None) -> nx.DiGraph:
                 causal_dag.add_edge(node, random.choice(output_nodes))
 
     # Rename inputs and outputs as X and Y variables, respectively
-    input_node_map = {v: f"X{i+1}" for i, v in enumerate(input_nodes)}
-    output_node_map = {v: f"Y{o+1}" for o, v in enumerate(output_nodes)}
+    input_node_map = {v: f"X{(i+1):02d}" for i, v in enumerate(input_nodes)}
+    output_node_map = {v: f"Y{(o+1):02d}" for o, v in enumerate(output_nodes)}
     node_map = input_node_map | output_node_map
     input_output_causal_dag = nx.relabel_nodes(causal_dag, node_map)
 
@@ -201,7 +201,9 @@ def construct_statement_stack_from_dag(causal_dag: nx.DiGraph):
                        generated.
     :return: A list of strings representing statements that can be executed in python.
     """
-    nodes_ordered_for_traversal = reversed([node for node in nx.topological_sort(causal_dag) if "Y" in node])
+    nodes_ordered_for_traversal = reversed(
+        [node for node in nx.lexicographical_topological_sort(causal_dag) if "Y" in node]
+    )
     statement_stack = []
 
     for output_node in nodes_ordered_for_traversal:
@@ -335,6 +337,7 @@ def write_statement_stack_to_python_file(
     namespace = {"np": np}
 
     exec(method, namespace)
+
     return method, namespace[program_name]
 
 
@@ -350,7 +353,11 @@ def generate_data(function, inputs: dict, seed: int, num_points: int, standardis
 
     if standardise:
         for col in data:
-            data[col] = (data[col] - data[col].mean()) / data[col].std()
+            std = data[col].std()
+            if std:
+                data[col] = (data[col] - data[col].mean()) / std
+            else:
+                data[col] = 0
     return data
 
 
@@ -364,7 +371,7 @@ def mutated_dag_and_data(
     max_mutants=float("inf"),
 ):
 
-    topo_order = {node: i for i, node in enumerate(list(nx.topological_sort(dag)))}
+    topo_order = {node: i for i, node in enumerate(list(nx.lexicographical_topological_sort(dag)))}
     for inx, edge in enumerate(
         filter(lambda edge: topo_order[edge[1]] > topo_order[edge[0]], permutations(dag.nodes(), 2))
     ):
@@ -387,7 +394,7 @@ def mutated_dag_and_data(
         namespace = {"np": np}
         exec(function, namespace)
 
-        yield operation, edge, mutated_dag, generate_data(
+        yield edge, generate_data(
             function=namespace["program"],
             inputs=inputs,
             num_points=num_points,
@@ -422,6 +429,7 @@ def dag_and_data(
     )
 
     data = generate_data(function=function, inputs=inputs, num_points=num_points, seed=seed, standardise=standardise)
+
     mutated_datasets = mutated_dag_and_data(
         dag=dag,
         function=function_str,

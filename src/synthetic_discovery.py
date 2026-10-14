@@ -1,8 +1,12 @@
 import argparse
 import os
+from collections import Counter
 
 import networkx as nx
 import pandas as pd
+from causal_testing.causal_testing_framework import CausalTestingFramework
+from causal_testing.specification.causal_dag import CausalDAG
+from causal_testing.testing.causal_test_case import CausalTestCase
 
 from discovery import (
     dag_confusion_matrix,
@@ -14,8 +18,6 @@ from discovery import (
     techniques,
 )
 from program_generation import dag_and_data
-from causal_testing.causal_testing_framework import CausalTestingFramework
-from causal_testing.specification.causal_dag import CausalDAG
 
 # We set the number of edges per node to 2 to reflect the fact that most software errors come from small
 # numbers of interacting variables
@@ -42,7 +44,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def infer_dag(args, reference_dag, data):
+def infer_dag(args, data) -> CausalDAG:
     if args.technique == "HillClimberDiscovery":
         inferred_dag = run_ctf_discovery(
             df=data,
@@ -56,19 +58,32 @@ def infer_dag(args, reference_dag, data):
     return inferred_dag
 
 
-def killed_mutant(mutated_edge: tuple[str, str], inferred_dag: CausalDAG, df: pd.DataFrame):
+def killed_mutants(inferred_dag: CausalDAG, mutants, reference_tests: list[CausalTestCase]):
     """
     Check whether the corresponding test case for a mutated edge failed, killing the mutant.
     """
-    inferred_dag.datatypes = df.dtypes
-    ctf = CausalTestingFramework(dag=inferred_dag, df=df, test_cases=inferred_dag.generate_causal_tests())
-    ctf.run_tests(silent=True)
-    treatment, outcome = mutated_edge
-    return any(
-        not test.result.passed
-        for test in ctf.test_cases
-        if test.treatment_variable == treatment and test.outcome_variable == outcome
-    )
+    result = {"tested_mutants": 0, "killed_mutants": 0}
+
+    for (treatment, outcome), mutated_data in mutants:
+        ctf = CausalTestingFramework(dag=inferred_dag, df=mutated_data, test_cases=inferred_dag.generate_causal_tests())
+        ctf.run_tests(silent=True)
+        reference_test = [
+            test
+            for test in reference_tests
+            if test.treatment_variable == treatment and test.outcome_variable == outcome
+        ]
+        mutant_test = [
+            test for test in ctf.test_cases if test.treatment_variable == treatment and test.outcome_variable == outcome
+        ]
+
+        result["tested_mutants"] += int(len(reference_test) > 0 and len(mutant_test) > 0)
+        result["killed_mutants"] += int(
+            len(reference_test) > 0
+            and len(mutant_test) > 0
+            and reference_test[0].result.passed
+            and not mutant_test[0].result.passed
+        )
+    return result
 
 
 def main():
@@ -89,25 +104,31 @@ def main():
         p_conditional=args.conditional_probability,
         num_points=args.data_amount,
         seed=args.seed,
-        max_mutants=3,
+        max_mutants=5,
     )
+    raw_data.to_csv("/tmp/data.csv")
     for output in [args.output, args.reference_output]:
         root, _ = os.path.split(output)
         if not os.path.exists(root):
             os.makedirs(root)
     nx.drawing.nx_pydot.write_dot(reference_dag, args.reference_output)
 
-    inferred_dag = infer_dag(args, reference_dag, raw_data)
+    inferred_dag = infer_dag(args, raw_data)
+
+    framework = CausalTestingFramework(dag=inferred_dag, df=raw_data, test_cases=inferred_dag.generate_causal_tests())
+    framework.run_tests(silent=True)
+
     inferred_dag.graph["graph"] |= (
         vars(args)
+        | killed_mutants(inferred_dag, mutants, framework.test_cases)
         | {
             "pass": 0,
             "fail": 0,
             "inestimable": 0,
-            "killed_mutants": sum(
-                killed_mutant(edge, inferred_dag, mutated_data)
-                for (operation, edge, mutated_dag, mutated_data) in mutants
-            ),
+        }
+        | {
+            k.name.lower(): v / len(framework.test_cases)
+            for k, v in Counter([test.result.outcome for test in framework.test_cases]).items()
         }
         | {f"directional_{key}": len(value) for key, value in dag_confusion_matrix(reference_dag, inferred_dag).items()}
         | {
@@ -116,14 +137,7 @@ def main():
         }
         | dag_difference_metrics(reference_dag, inferred_dag)
     )
-    try:
-        # Do this as a separate step in case the DAG is cyclic - it shouldn't be!
-        inferred_dag.graph["graph"] |= {"reference_" + k: v for k, v in evaluate_dag(reference_dag, raw_data).items()}
-        inferred_dag.graph["graph"] |= evaluate_dag(inferred_dag, raw_data)
-
-    except (nx.HasACycle, ValueError) as e:
-        if "error" not in inferred_dag.graph["graph"]:
-            inferred_dag.graph["graph"] = vars(args) | {"error": str(e)}
+    inferred_dag.graph["graph"] |= {"reference_" + k: v for k, v in evaluate_dag(reference_dag, raw_data).items()}
 
     nx.drawing.nx_pydot.write_dot(inferred_dag, args.output)
 
