@@ -58,11 +58,16 @@ def infer_dag(args, data) -> CausalDAG:
     return inferred_dag
 
 
-def killed_mutants(inferred_dag: CausalDAG, mutants, reference_tests: list[CausalTestCase]):
+def killed_mutants(inferred_dag: CausalDAG, mutants, reference_tests: dict[str, int]):
     """
     Check whether the corresponding test case for a mutated edge failed, killing the mutant.
+    Tested mutants represent mutated edges that correspond to a (treatment, outcome) test from the causal DAG.
+    Killed mutants represent tests that passed for the raw data and failed for the mutated data, thereby unambiguously
+    killing the mutant
+    Ambiguous mutants represent tests that failed on both the raw data and the mutated data, thus technically killing
+    the mutant, but not in a way that tells us much.
     """
-    result = {"tested_mutants": 0, "killed_mutants": 0}
+    result = {"tested_mutants": 0, "killed_mutants": 0, "ambiguous_mutants": 0}
 
     for (treatment, outcome), mutated_data in mutants:
         ctf = CausalTestingFramework(dag=inferred_dag, df=mutated_data, test_cases=inferred_dag.generate_causal_tests())
@@ -82,6 +87,9 @@ def killed_mutants(inferred_dag: CausalDAG, mutants, reference_tests: list[Causa
             and len(mutant_test) > 0
             and reference_test[0].result.passed
             and not mutant_test[0].result.passed
+        )
+        result["ambiguous_mutants"] += int(
+            len(reference_test) > 0 and len(mutant_test) > 0 and not mutant_test[0].result.passed
         )
     return result
 
@@ -104,9 +112,8 @@ def main():
         p_conditional=args.conditional_probability,
         num_points=args.data_amount,
         seed=args.seed,
-        max_mutants=5,
     )
-    raw_data.to_csv("/tmp/data.csv")
+
     for output in [args.output, args.reference_output]:
         root, _ = os.path.split(output)
         if not os.path.exists(root):
