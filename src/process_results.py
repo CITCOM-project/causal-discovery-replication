@@ -130,6 +130,7 @@ if __name__ == "__main__":
 
     print(df.groupby("technique")["killed_mutants"].sum())
     print(df.groupby("technique")["tested_mutants"].sum())
+    print(df.groupby("technique")["total_mutants"].sum())
 
     df["normalised_pass"] = df["pass"] / df["reference_pass"]
 
