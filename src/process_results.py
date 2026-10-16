@@ -128,27 +128,18 @@ if __name__ == "__main__":
             if seed not in map(int, group["seed"]):
                 print(technique, seed)
 
-    print(df.groupby("technique")["killed_mutants"].sum())
-    print(df.groupby("technique")["tested_mutants"].sum())
-    print(df.groupby("technique")["total_mutants"].sum())
-
     df["normalised_pass"] = df["pass"] / df["reference_pass"]
-
-    # with open("synthetic_configurations.txt") as f:
-    #     for line in f:
-    #         line = line.strip()
-    #         args = {k: v for k, v in chunks(line.split(" "), 2)}
-    #         if not ((df["seed"] == int(args["-s"])) & (df["technique"] == args["-t"])).any():
-    #             print(
-    #                 "sbatch --time=04:00:00 --nodes=1 --ntasks=1 --cpus-per-task=1 --mem=8G apptainer exec apptainer.sif python src/synthetic_discovery.py",
-    #                 line,
-    #             )
-
+    df["mutation_score"] = df["killed_mutants"] / df["total_mutants"]
+    df["tested_mutation_score"] = df["tested_mutants"] / df["total_mutants"]
+    df["ambiguous_mutation_score"] = df["ambiguous_mutants"] / df["total_mutants"]
     df["normalised_edit_distance"] = df["edit_distance"] / (((df["nodes"] * (df["nodes"] - 1)) / 2))
     df["normalised_structural_hamming"] = df["structural_hamming"] / (((df["nodes"] * (df["nodes"] - 1)) / 2))
     df["normalised_structural_intervention"] = df["structural_intervention"] / (((df["nodes"] * (df["nodes"] - 1))))
-
     df["pass_rate"] = df["pass"] * 100
+
+    plot_accuracy(df, "mutation_score", "Mutation Score")
+    plot_accuracy(df, "tested_mutation_score", "Tested Mutation Score")
+    plot_accuracy(df, "ambiguous_mutation_score", "Ambiguous Mutation Score")
 
     plot_accuracy(df, "pass_rate", "Pass Rate (%)")
     plot_accuracy(df, "fail")
