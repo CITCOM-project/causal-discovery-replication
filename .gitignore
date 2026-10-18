@@ -8,3 +8,4 @@ figures/
 apptainer.sif
 *.zip
 data.csv
+statistics/

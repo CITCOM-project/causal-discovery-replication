@@ -1,3 +1,8 @@
+import os
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 from discovery import (
@@ -9,29 +14,29 @@ from discovery import (
     run_gcastle_discovery,
     techniques,
 )
+from process_results import BLUE, RED, plot_grouped_boxplot, technique_labels
+
+plt.style.use("ggplot")
+
+mpl.use("pgf")
+
+# 2. Configure Matplotlib to use LaTeX for text rendering
+mpl.rcParams.update(
+    {
+        "pgf.texsystem": "pdflatex",  # or "xelatex", "lualatex"
+        "text.usetex": True,  # Enables TeX parsing for all text elements
+        "font.family": "serif",  # Matches LaTeX default serif font
+        "pgf.preamble": r"\providecommand{\toolname}{\textsc{hillClimber}}",
+        # "pgf.preamble": "\n".join(
+        #     [  # Optional: load custom TeX packages
+        #         r"\usepackage[utf8]{inputenc}",
+        #         r"\usepackage[T1]{fontenc}",
+        #     ]
+        # ),
+    }
+)
 
 data = pd.read_csv("data/foster_2024_carla.csv")
-
-
-def get_valid_columns(df: pd.DataFrame) -> list[str]:
-    """
-    Filter out irrelevant and non-usable columns.
-    """
-
-    valid_cols = [
-        c
-        for c in df.columns
-        if "Unnamed" not in c  # Errant index columns from saving dataframes
-        and "index" not in c  # run indices
-        and "id" not in c  # run indices
-        and "seed" not in c  # random seeds
-        and "version" not in c  # random seeds
-        and "weather"
-        not in c  # Duplicated columns in one of the CARLA datasets (e.g. cloudiness and weather_cloudiness)
-        and df[c].nunique(dropna=False) > 1  # Check unique count without dropping NaNs
-        and not df[c].isnull().any()  # Ensure no NaN values in columns
-    ]
-    return valid_cols
 
 
 valid_cols = [
@@ -54,28 +59,58 @@ valid_cols = [
     "driving_score",
 ]
 
-
-seed = 0
+for col in data:
+    if pd.api.types.is_bool_dtype(data[col]):
+        data[col] = data[col].astype(int)
+    if not pd.api.types.is_numeric_dtype(data[col]):
+        indices = {value: inx for inx, value in enumerate(data[col].unique())}
+        data[col] = [indices[x] for x in data[col]]
 
 training_data = data.loc[data["carla_version"] == 10, valid_cols]
 test_data = data.loc[data["carla_version"] == 11, valid_cols]
 
-for technique in techniques:
-    if technique == "HillClimberDiscovery":
-        inferred_dag = run_ctf_discovery(
-            df=training_data,
-            random_seed=seed,
-        )
-    elif technique == "notears":
-        inferred_dag = run_gcastle_discovery(technique=technique, df=training_data)
-    else:
-        for col in training_data:
-            if pd.api.types.is_bool_dtype(training_data[col]):
-                training_data[col] = training_data[col].astype(int)
-            if not pd.api.types.is_numeric_dtype(training_data[col]):
-                indices = {value: inx for inx, value in enumerate(training_data[col].unique())}
-                training_data[col] = [indices[x] for x in training_data[col]]
-        inferred_dag = run_causal_learn_discovery(technique=technique, df=training_data)
+if not os.path.exists("carla_results.csv"):
+    runs = []
+    for technique in techniques:
+        if technique == "HillClimberDiscovery":
+            for seed in range(30):
+                inferred_dag = run_ctf_discovery(
+                    df=training_data,
+                    random_seed=seed,
+                )
+                runs.append(
+                    {"technique": technique}
+                    | {f"training_{k}": v for k, v in evaluate_dag(inferred_dag, test_data).items()}
+                    | {f"regression_{k}": v for k, v in evaluate_dag(inferred_dag, training_data).items()}
+                )
+        elif technique == "notears":
+            inferred_dag = run_gcastle_discovery(technique=technique, df=training_data)
+            runs.append(
+                {"technique": technique}
+                | {f"training_{k}": v for k, v in evaluate_dag(inferred_dag, test_data).items()}
+                | {f"regression_{k}": v for k, v in evaluate_dag(inferred_dag, training_data).items()}
+            )
+        else:
+            inferred_dag = run_causal_learn_discovery(technique=technique, df=training_data)
+            runs.append(
+                {"technique": technique}
+                | {f"training_{k}": v for k, v in evaluate_dag(inferred_dag, test_data).items()}
+                | {f"regression_{k}": v for k, v in evaluate_dag(inferred_dag, training_data).items()}
+            )
 
-    print(evaluate_dag(inferred_dag, test_data))
-    print(evaluate_dag(inferred_dag, training_data))
+    df = pd.DataFrame(runs)
+    df.to_csv("carla_results.csv")
+else:
+    df = pd.read_csv("carla_results.csv")
+
+df["technique"] = df["technique"].replace(technique_labels)
+version_labels = {"training_pass": "v0.9.10.1", "regression_pass": "v0.9.11"}
+plot_grouped_boxplot(
+    groups=np.array([df.groupby("technique", sort=False)[version].apply(list) for version in version_labels]),
+    savepath="figures/carla.pgf",
+    colours=[RED, BLUE],
+    xticklabels=df["technique"].unique(),
+    labels=[version_labels[v] for v in version_labels],
+    xlabel="CARLA version",
+    ylabel="Pass Rate",
+)
