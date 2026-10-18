@@ -150,7 +150,7 @@ def run_ctf_discovery(df: pd.DataFrame, random_seed: int = None, **kwargs) -> Ca
     discover = HillClimberDiscovery(
         df=df,
         random_seed=random_seed,
-        exclude_edges=[(".*", r"X\d+")] + kwargs.pop("exclude_edges", []),
+        max_iterations=50,
         **kwargs,
     )
     dag = discover.discover()
