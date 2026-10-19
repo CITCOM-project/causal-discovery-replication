@@ -394,3 +394,9 @@ if __name__ == "__main__":
         buf="statistics/pass_correlations.tex",
         hrules=True,  # Enables booktabs rules (\toprule, \midrule, \bottomrule)
     )
+
+    # Runtime
+    plot_accuracy(df.assign(time=np.log(df["time"])), "time", "log(runtime)")
+    print(df.groupby("technique")["time"].median().sort_values())
+
+    print(sorted(df.columns))
