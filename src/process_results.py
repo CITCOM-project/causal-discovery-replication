@@ -22,12 +22,6 @@ mpl.rcParams.update(
         "text.usetex": True,  # Enables TeX parsing for all text elements
         "font.family": "serif",  # Matches LaTeX default serif font
         "pgf.preamble": r"\providecommand{\toolname}{\textsc{hillClimber}}",
-        # "pgf.preamble": "\n".join(
-        #     [  # Optional: load custom TeX packages
-        #         r"\usepackage[utf8]{inputenc}",
-        #         r"\usepackage[T1]{fontenc}",
-        #     ]
-        # ),
     }
 )
 
@@ -356,12 +350,31 @@ if __name__ == "__main__":
     table_df = stats_df.pivot(
         index="technique",
         columns=["measure", "feature"],
-        values="statistic",  # or format statistic and p-value together
+        values="statistic",
     )
 
-    table_df.style.format(precision=3).to_latex(  # Format float decimal places
+    pvals_df = stats_df.pivot(
+        index="technique",
+        columns=["measure", "feature"],
+        values="p-value",
+    )
+
+    # Create a DataFrame of raw LaTeX commands
+    def apply_latex_bold(data):
+        return pd.DataFrame(
+            np.where(pvals_df < 0.05, "font-weight: bold", ""),
+            index=data.index,
+            columns=data.columns,
+        )
+
+    # Convert to LaTeX using environment='latex' formatting rules
+    styler = table_df.style.format(precision=3).apply(apply_latex_bold, axis=None)
+
+    # Explicitly pass environment or LaTeX converter settings
+    styler.to_latex(
         buf="statistics/measure_correlations.tex",
-        hrules=True,  # Enables booktabs rules (\toprule, \midrule, \bottomrule)
+        hrules=True,
+        convert_css=True,  # Ensure converter is active
     )
 
     # RQ2
