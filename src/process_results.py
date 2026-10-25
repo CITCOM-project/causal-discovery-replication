@@ -34,6 +34,11 @@ technique_colours = {r"\toolname": RED, "GES": BLUE, "PC": GREEN, "NOTEARS": MAG
 technique_labels = {"HillClimberDiscovery": r"\toolname", "ges": "GES", "pc": "PC", "notears": "NOTEARS"}
 
 technique_order = ["HillClimberDiscovery", "ges", "pc", "notears"]
+short_feature_labels = {
+    "nodes": "Nodes",
+    "data_amount": "Data",
+    "probability_of_conditional": "$p_c$",
+}
 
 
 def compute_stats(df, column, save_path, p_alpha=0.05, low_is_good=False):
@@ -280,8 +285,49 @@ if __name__ == "__main__":
     # RQ1
     print("RQ1")
     plot_accuracy(df, "mutation_score", "Mutation Score")
+
+    stats = []
     for feature in ["nodes", "data_amount", "probability_of_conditional"]:
         scatters(df, "technique", feature, "mutation_score")
+        for technique, group in df.groupby("technique", sort=False):
+            statistic, p_value = spearmanr(group[feature], group["mutation_score"])
+            stats.append(
+                {
+                    "technique": technique,
+                    "feature": short_feature_labels[feature],
+                    "statistic": statistic,
+                    "p-value": p_value,
+                }
+            )
+
+    stats_df = pd.DataFrame(stats)
+    table_df = stats_df.pivot(
+        index="technique",
+        columns=["feature"],
+        values="statistic",
+    ).reindex(stats_df["technique"].unique())
+
+    table_df.style.format(precision=3).apply(
+        lambda data: pd.DataFrame(
+            np.where(
+                stats_df.pivot(
+                    index="technique",
+                    columns=["feature"],
+                    values="p-value",
+                ).reindex(stats_df["technique"].unique())
+                < 0.05,
+                "font-weight: bold",
+                "",
+            ),
+            index=data.index,
+            columns=data.columns,
+        ),
+        axis=None,
+    ).to_latex(
+        buf="statistics/mutation_score_correlations.tex",
+        hrules=True,
+        convert_css=True,
+    )
 
     # RQ2
     print("\nRQ2")
@@ -309,11 +355,6 @@ if __name__ == "__main__":
     )
     stats = []
 
-    short_feature_labels = {
-        "nodes": "Nodes",
-        "data_amount": "Data",
-        "probability_of_conditional": "$p_c$",
-    }
     for technique, group in df.groupby("technique", sort=False):
         for measure in [
             "pass_rate",
@@ -362,7 +403,7 @@ if __name__ == "__main__":
         convert_css=True,
     )
 
-    # RQ2
+    # RQ3
     print("\nRQ3")
     stats = []
     for measure in [
