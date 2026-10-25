@@ -33,6 +33,8 @@ MAGENTA = "#CC79A7"
 technique_colours = {r"\toolname": RED, "GES": BLUE, "PC": GREEN, "NOTEARS": MAGENTA}
 technique_labels = {"HillClimberDiscovery": r"\toolname", "ges": "GES", "pc": "PC", "notears": "NOTEARS"}
 
+technique_order = ["HillClimberDiscovery", "ges", "pc", "notears"]
+
 
 def compute_stats(df, column, save_path, p_alpha=0.05, low_is_good=False):
     # Reshape from Long to Wide Format
@@ -117,10 +119,10 @@ def read_data(data_path: str = None) -> pd.DataFrame:
     data["pass_rate"] = data["pass"]  # * 100
     data.rename({"conditional_probability": "probability_of_conditional"}, axis=1, inplace=True)
 
-    # data = data.sort_values(["technique", "seed"])
+    data["technique_order"] = data["technique"].replace({v: k for k, v in enumerate(technique_order)})
     data["technique"] = data["technique"].replace(technique_labels)
 
-    return data
+    return data.sort_values(["technique_order", "seed"])
 
 
 def plot_accuracy(df: pd.DataFrame, column: str, label: str = None, extension: str = "pgf"):
@@ -129,12 +131,12 @@ def plot_accuracy(df: pd.DataFrame, column: str, label: str = None, extension: s
     compute_stats(df, column, f"stats/{column}.tex")
     ax.boxplot(
         df.groupby("technique", sort=False)[column].apply(list),
-        tick_labels=df.loc[~df[column].isnull()].groupby("technique", sort=False).groups.keys(),
+        tick_labels=df.groupby("technique", sort=False).groups.keys(),
     )
     ax.tick_params("x", rotation=45, rotation_mode="xtick")
     ax.set_ylabel(label if label else column.capitalize().replace("_", " "))
     if df[column].between(0, 1).all():
-        ax.set_ylim(-0.01, 1.01)
+        ax.set_ylim(-0.03, 1.03)
     plt.tight_layout()
     # plt.savefig(f"figures/{column}.png")
     plt.savefig(f"figures/{column}.{extension}", bbox_inches="tight")
@@ -170,6 +172,7 @@ def plot_grouped_boxplot(
     offset=0,
     figsize=(10, 6),
     legend=True,
+    ylim=None,
 ):
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
@@ -215,25 +218,11 @@ def plot_grouped_boxplot(
         ax.set_ylabel(ylabel)
     if yticks is not None:
         ax.set_yticks(yticks)
+    if ylim is not None:
+        ax.set_ylim(*ylim)
     if savepath is not None:
         plt.savefig(savepath, bbox_inches="tight", pad_inches=0)
         plt.clf()
-
-
-def scatter(df: pd.DataFrame, x_column: str, y_column: str):
-    res, p_value = spearmanr(df[x_column], df[y_column], nan_policy="omit")
-
-    _, ax = plt.subplots()
-    ax.scatter(df[x_column], df[y_column])
-    ax.set_xlabel(x_column)
-    ax.set_ylabel(y_column)
-    ax.set_title(f"spearmanr={round(res,2)} ({round(p_value, 2)})")
-    plt.tight_layout()
-    # plt.savefig(f"figures/{x_column}_{y_column}.png")
-    plt.savefig(f"figures/{x_column}_{y_column}.pgf", bbox_inches="tight")
-    print("Statistic", res, "p-value", p_value)
-    print(df[[x_column, y_column]])
-    plt.close()
 
 
 def scatters(
@@ -243,7 +232,7 @@ def scatters(
 
     _, ax = plt.subplots()
     stats = {}
-    for label, group in df.groupby(group_by):
+    for label, group in df.groupby(group_by, sort=False):
         ax.scatter(group[x_column], group[y_column], label=label, color=technique_colours[label], alpha=0.5)
 
         if plot_best_fit:
@@ -262,6 +251,9 @@ def scatters(
     print(stats)
     stats.to_latex(f"statistics/{x_column}_{y_column}.tex")
 
+    if df[y_column].between(0, 1).all():
+        ax.set_ylim(-0.03, 1.03)
+
     ax.set_xlabel(x_column.capitalize().replace("_", " "))
     ax.set_ylabel(y_column.capitalize().replace("_", " "))
     plt.legend()
@@ -270,12 +262,6 @@ def scatters(
     plt.savefig(f"figures/{x_column}_{y_column}.{extension}", bbox_inches="tight")
     plt.close()
     print("=" * 80)
-
-
-def chunks(lst, n):
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i : i + n]
 
 
 if __name__ == "__main__":
@@ -300,10 +286,10 @@ if __name__ == "__main__":
     # RQ2
     print("\nRQ2")
     measure_labels = {
-        "pass_rate": "Pass rate",
-        "normalised_structural_intervention": "Normalised SID",
-        "normalised_structural_hamming": "Normalised SHD",
-        "directional_bcr": "BCR",
+        "pass_rate": r"Pass rate $\uparrow$",
+        "normalised_structural_intervention": r"Normalised SID $\downarrow$",
+        "normalised_structural_hamming": r"Normalised SHD $\downarrow$",
+        "directional_bcr": r"BCR $\uparrow$",
     }
     measures = [
         "pass_rate",
@@ -319,6 +305,7 @@ if __name__ == "__main__":
         xticklabels=[measure_labels[m] for m in measures],
         xlabel="Metric",
         ylabel="Value",
+        ylim=(-0.03, 1.03),
     )
     stats = []
 
@@ -327,7 +314,7 @@ if __name__ == "__main__":
         "data_amount": "Data",
         "probability_of_conditional": "$p_c$",
     }
-    for technique, group in df.groupby("technique"):
+    for technique, group in df.groupby("technique", sort=False):
         for measure in [
             "pass_rate",
             "normalised_structural_intervention",
@@ -345,36 +332,34 @@ if __name__ == "__main__":
                         "p-value": p_value,
                     }
                 )
-    stats_df = pd.DataFrame(stats)
 
+    stats_df = pd.DataFrame(stats)
     table_df = stats_df.pivot(
         index="technique",
         columns=["measure", "feature"],
         values="statistic",
-    )
+    ).reindex(stats_df["technique"].unique())
 
-    pvals_df = stats_df.pivot(
-        index="technique",
-        columns=["measure", "feature"],
-        values="p-value",
-    )
-
-    # Create a DataFrame of raw LaTeX commands
-    def apply_latex_bold(data):
-        return pd.DataFrame(
-            np.where(pvals_df < 0.05, "font-weight: bold", ""),
+    table_df.style.format(precision=3).apply(
+        lambda data: pd.DataFrame(
+            np.where(
+                stats_df.pivot(
+                    index="technique",
+                    columns=["measure", "feature"],
+                    values="p-value",
+                ).reindex(stats_df["technique"].unique())
+                < 0.05,
+                "font-weight: bold",
+                "",
+            ),
             index=data.index,
             columns=data.columns,
-        )
-
-    # Convert to LaTeX using environment='latex' formatting rules
-    styler = table_df.style.format(precision=3).apply(apply_latex_bold, axis=None)
-
-    # Explicitly pass environment or LaTeX converter settings
-    styler.to_latex(
+        ),
+        axis=None,
+    ).to_latex(
         buf="statistics/measure_correlations.tex",
         hrules=True,
-        convert_css=True,  # Ensure converter is active
+        convert_css=True,
     )
 
     # RQ2
@@ -397,15 +382,35 @@ if __name__ == "__main__":
                 }
             )
 
-    table_df = pd.DataFrame(stats).pivot(
+    print(pd.DataFrame(stats))
+
+    stats_df = pd.DataFrame(stats)
+    table_df = stats_df.pivot(
         index="technique",
         columns=["measure"],
-        values="statistic",  # or format statistic and p-value together
-    )
+        values="statistic",
+    ).reindex(stats_df["technique"].unique())
 
-    table_df.style.format(precision=3).to_latex(  # Format float decimal places
+    table_df.style.format(precision=3).apply(
+        lambda data: pd.DataFrame(
+            np.where(
+                stats_df.pivot(
+                    index="technique",
+                    columns=["measure"],
+                    values="p-value",
+                ).reindex(stats_df["technique"].unique())
+                < 0.05,
+                "font-weight: bold",
+                "",
+            ),
+            index=data.index,
+            columns=data.columns,
+        ),
+        axis=None,
+    ).to_latex(
         buf="statistics/pass_correlations.tex",
-        hrules=True,  # Enables booktabs rules (\toprule, \midrule, \bottomrule)
+        hrules=True,
+        convert_css=True,
     )
 
     # Runtime
