@@ -1,8 +1,82 @@
+import ast
 import random
+from itertools import permutations
 
 import networkx as nx
 import numpy as np
 import pandas as pd
+
+
+def add_term(
+    code: str,
+    rhs_var: str,
+    lhs_var: str,
+) -> str:
+    """Inserts (coeff * rhs_var) into all branches of the statement targeting lhs_var."""
+    tree = ast.parse(code)
+
+    def _transform(node):
+        if isinstance(node, ast.Call) and getattr(node.func, "attr", None) == "where":
+            # Recursively modify true and false branches of np.where
+            node.args[1] = _transform(node.args[1])
+            node.args[2] = _transform(node.args[2])
+            return node
+        # Append term to linear combination
+        return ast.BinOp(
+            left=node,
+            op=ast.Add(),
+            right=ast.BinOp(
+                left=ast.Constant(value=coefficient()),
+                op=ast.Mult(),
+                right=ast.Name(id=rhs_var, ctx=ast.Load()),
+            ),
+        )
+
+    for stmt in ast.walk(tree):
+        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and getattr(stmt.targets[0], "id", None) == lhs_var:
+            stmt.value = _transform(stmt.value)
+
+    ast.fix_missing_locations(tree)
+
+    return ast.unparse(tree)
+
+
+def remove_term(code: str, lhs_var: str, rhs_var: str) -> str:
+    """Replaces any term containing rhs_var in lhs_var's assignment with a random constant."""
+    tree = ast.parse(code)
+
+    def _contains_var(node):
+        return any(isinstance(n, ast.Name) and n.id == rhs_var for n in ast.walk(node))
+
+    def _transform(node):
+        if isinstance(node, ast.Call) and getattr(node.func, "attr", None) == "where":
+            node.args[1] = _transform(node.args[1])
+            node.args[2] = _transform(node.args[2])
+            return node
+
+        if isinstance(node, ast.BinOp):
+            # If the right side of this operation contains the target variable (e.g., `+ (-5 * Y1)`),
+            # replace that whole binary term with a random constant.
+            if _contains_var(node.right):
+                node.right = ast.Constant(value=coefficient())
+                return node
+            # If the left side contains it, replace the left child directly
+            if _contains_var(node.left):
+                node.left = ast.Constant(value=coefficient())
+                return node
+
+            node.left = _transform(node.left)
+            node.right = _transform(node.right)
+
+        return node
+
+    for stmt in ast.walk(tree):
+        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and getattr(stmt.targets[0], "id", None) == lhs_var:
+            stmt.value = _transform(stmt.value)
+
+    ast.fix_missing_locations(tree)
+
+    return ast.unparse(tree)
 
 
 def generate_dag(n_nodes: int, p_edge: float, seed: int = None) -> nx.DiGraph:
@@ -65,8 +139,8 @@ def generate_dag(n_nodes: int, p_edge: float, seed: int = None) -> nx.DiGraph:
                 causal_dag.add_edge(node, random.choice(output_nodes))
 
     # Rename inputs and outputs as X and Y variables, respectively
-    input_node_map = {v: f"X{i+1}" for i, v in enumerate(input_nodes)}
-    output_node_map = {v: f"Y{o+1}" for o, v in enumerate(output_nodes)}
+    input_node_map = {v: f"X{(i+1):02d}" for i, v in enumerate(input_nodes)}
+    output_node_map = {v: f"Y{(o+1):02d}" for o, v in enumerate(output_nodes)}
     node_map = input_node_map | output_node_map
     input_output_causal_dag = nx.relabel_nodes(causal_dag, node_map)
 
@@ -127,7 +201,9 @@ def construct_statement_stack_from_dag(causal_dag: nx.DiGraph):
                        generated.
     :return: A list of strings representing statements that can be executed in python.
     """
-    nodes_ordered_for_traversal = reversed([node for node in nx.topological_sort(causal_dag) if "Y" in node])
+    nodes_ordered_for_traversal = reversed(
+        [node for node in nx.lexicographical_topological_sort(causal_dag) if "Y" in node]
+    )
     statement_stack = []
 
     for output_node in nodes_ordered_for_traversal:
@@ -159,6 +235,10 @@ def construct_statement_stack_from_dag(causal_dag: nx.DiGraph):
     return statement_stack
 
 
+def coefficient():
+    return random.choice([random.randint(1, 10), random.randint(-10, -1)])
+
+
 def generate_linear_statement(causes: list[str]):
     """Generate a random linear statement of the effect node that includes all of the causes.
 
@@ -167,7 +247,7 @@ def generate_linear_statement(causes: list[str]):
     :param causes: Nodes to appear on RHS of statement.
     :return statement: A string representing a linear statement in Python.
     """
-    coefficients = [random.choice([random.randint(1, 10), random.randint(-10, -1)]) for _ in causes]
+    coefficients = [coefficient() for _ in causes]
     expr = " + ".join([f"({c} * {x})" for c, x in zip(coefficients, causes)])
     expr += f" + {random.uniform(-10, 10)}"
     return expr
@@ -256,24 +336,13 @@ def write_statement_stack_to_python_file(
 
     namespace = {"np": np}
 
-    with open("/tmp/program.py", "w") as f:
-        f.write(method)
     exec(method, namespace)
-    return namespace[program_name]
+
+    return method, namespace[program_name]
 
 
-def dag_and_data(
-    n_nodes: int, p_edge: float, p_conditional: float, num_points: int, seed: int, standardise: bool = True
-):
-    """
-    Generate a causal DAG and associated dataset.
-    """
-
-    np.random.seed(seed)
-
-    dag, inputs = generate_dag(n_nodes=n_nodes, p_edge=p_edge, seed=seed)
-    function = generate_program(dag, p_conditional=p_conditional, program_name="program")
-    data = pd.DataFrame(function(**{x: np.random.uniform(low=-100, high=100, size=num_points) for x in inputs}))
+def generate_data(function, inputs: dict, seed: int, num_points: int, standardise: bool = True):
+    data = pd.DataFrame(function(**inputs))
 
     output_columns = [column for column in data if column.startswith("Y")]
     data[output_columns] += np.random.normal(
@@ -284,6 +353,91 @@ def dag_and_data(
 
     if standardise:
         for col in data:
-            data[col] = (data[col] - data[col].mean()) / data[col].std()
+            std = data[col].std()
+            if std:
+                data[col] = (data[col] - data[col].mean()) / std
+            else:
+                data[col] = 0
+    return data
 
-    return dag, data
+
+def mutated_dag_and_data(
+    dag: nx.DiGraph,
+    inputs: dict,
+    function,
+    num_points: int,
+    seed: int,
+    standardise: bool = True,
+    max_mutants=float("inf"),
+):
+
+    topo_order = {node: i for i, node in enumerate(list(nx.lexicographical_topological_sort(dag)))}
+    for inx, edge in enumerate(
+        filter(lambda edge: topo_order[edge[1]] > topo_order[edge[0]], permutations(dag.nodes(), 2))
+    ):
+        if inx >= max_mutants:
+            break
+        mutated_dag = dag.copy()
+        if edge in dag.edges():
+            mutated_dag.remove_edge(*edge)
+            function = remove_term(function, *edge)
+            operation = "removed"
+        else:
+            mutated_dag.add_edge(*edge)
+            function = add_term(function, *edge)
+            operation = "added"
+        if not nx.is_directed_acyclic_graph(mutated_dag) or any(
+            dag.in_degree(node) == 0 for node in dag.nodes if node not in inputs
+        ):
+            continue
+
+        namespace = {"np": np}
+        exec(function, namespace)
+
+        yield edge, generate_data(
+            function=namespace["program"],
+            inputs=inputs,
+            num_points=num_points,
+            seed=seed,
+            standardise=standardise,
+        )
+
+
+def dag_and_data(
+    n_nodes: int,
+    p_edge: float,
+    p_conditional: float,
+    num_points: int,
+    seed: int,
+    standardise: bool = True,
+    max_mutants=float("inf"),
+):
+    """
+    Generate a causal DAG and associated dataset.
+    """
+
+    np.random.seed(seed)
+
+    dag, inputs = generate_dag(n_nodes=n_nodes, p_edge=p_edge, seed=seed)
+    inputs = {x: np.random.uniform(low=-100, high=100, size=num_points) for x in inputs}
+
+    np.random.seed(seed)
+    function_str, function = generate_program(
+        dag,
+        p_conditional=p_conditional,
+        program_name="program",
+    )
+
+    data = generate_data(function=function, inputs=inputs, num_points=num_points, seed=seed, standardise=standardise)
+
+    mutated_datasets = mutated_dag_and_data(
+        dag=dag,
+        function=function_str,
+        inputs=inputs,
+        num_points=num_points,
+        seed=seed,
+        standardise=standardise,
+        max_mutants=max_mutants,
+    )
+
+    return dag, data, mutated_datasets
