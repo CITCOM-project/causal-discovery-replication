@@ -138,7 +138,7 @@ def plot_accuracy(df: pd.DataFrame, column: str, label: str = None, extension: s
         df.groupby("technique", sort=False)[column].apply(list),
         tick_labels=df.groupby("technique", sort=False).groups.keys(),
     )
-    ax.tick_params("x", rotation=45, rotation_mode="xtick")
+    ax.tick_params("x", rotation_mode="xtick")
     ax.set_ylabel(label if label else column.capitalize().replace("_", " "))
     if df[column].between(0, 1).all():
         ax.set_ylim(-0.03, 1.03)
