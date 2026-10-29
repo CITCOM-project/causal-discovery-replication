@@ -113,4 +113,5 @@ plot_grouped_boxplot(
     labels=[version_labels[v] for v in version_labels],
     xlabel="CARLA version",
     ylabel="Pass Rate",
+    ylim=(-0.03, 1.03),
 )

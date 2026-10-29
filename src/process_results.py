@@ -131,7 +131,7 @@ def read_data(data_path: str = None) -> pd.DataFrame:
 
 
 def plot_accuracy(df: pd.DataFrame, column: str, label: str = None, extension: str = "pgf"):
-    _, ax = plt.subplots()
+    _, ax = plt.subplots(figsize=(10, 6))
 
     compute_stats(df, column, f"stats/{column}.tex")
     ax.boxplot(
@@ -235,7 +235,7 @@ def scatters(
 ):
     print("=" * 20, x_column, y_column, "=" * 20)
 
-    _, ax = plt.subplots()
+    _, ax = plt.subplots(figsize=(10, 6))
     stats = {}
     for label, group in df.groupby(group_by, sort=False):
         ax.scatter(group[x_column], group[y_column], label=label, color=technique_colours[label], alpha=0.5)
@@ -331,6 +331,7 @@ if __name__ == "__main__":
 
     # RQ2
     print("\nRQ2")
+    print(df.groupby("technique", sort=False)["pass_rate"].median())
     measure_labels = {
         "pass_rate": r"Pass rate $\uparrow$",
         "normalised_structural_intervention": r"Normalised SID $\downarrow$",
@@ -455,7 +456,24 @@ if __name__ == "__main__":
     )
 
     # Runtime
-    plot_accuracy(df.assign(time=np.log(df["time"])), "time", "log(runtime)")
+    # plot_accuracy(df.assign(time=np.log(df["time"])), "time", "log(runtime)")
+
+    _, ax = plt.subplots(figsize=(10, 6))
+
+    ax.boxplot(
+        df.groupby("technique", sort=False)["time"].apply(lambda x: list(np.log(x))),
+        tick_labels=df.groupby("technique", sort=False).groups.keys(),
+    )
+    ax.set_yticks(np.arange(-4, 11, 2))
+    ax.set_yticklabels(map(lambda n: f"{n:.2E}" if n > 1000 else f"{n}", 10.0 ** np.arange(-4, 11, 2)))
+    ax.tick_params("x", rotation_mode="xtick")
+    ax.set_ylabel("Runtime (s) (log scale)")
+    if df["time"].between(0, 1).all():
+        ax.set_ylim(-0.03, 1.03)
+    plt.tight_layout()
+    plt.savefig("figures/time.pgf", bbox_inches="tight")
+    plt.close()
+
     print(df.groupby("technique")["time"].median().sort_values())
 
     print(sorted(df.columns))
