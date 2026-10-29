@@ -140,6 +140,7 @@ def plot_accuracy(df: pd.DataFrame, column: str, label: str = None, extension: s
     )
     ax.tick_params("x", rotation_mode="xtick")
     ax.set_ylabel(label if label else column.capitalize().replace("_", " "))
+    ax.set_xlabel("Technique")
     if df[column].between(0, 1).all():
         ax.set_ylim(-0.03, 1.03)
     plt.tight_layout()
@@ -468,6 +469,7 @@ if __name__ == "__main__":
     ax.set_yticklabels(map(lambda n: f"{n:.2E}" if n > 1000 else f"{n}", 10.0 ** np.arange(-4, 11, 2)))
     ax.tick_params("x", rotation_mode="xtick")
     ax.set_ylabel("Runtime (s) (log scale)")
+    ax.set_xlabel("Technique")
     if df["time"].between(0, 1).all():
         ax.set_ylim(-0.03, 1.03)
     plt.tight_layout()
