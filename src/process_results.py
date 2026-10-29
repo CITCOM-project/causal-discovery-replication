@@ -462,13 +462,14 @@ if __name__ == "__main__":
     _, ax = plt.subplots(figsize=(10, 6))
 
     ax.boxplot(
-        df.groupby("technique", sort=False)["time"].apply(lambda x: list(np.log(x))),
+        df.groupby("technique", sort=False)["time"].apply(list),
         tick_labels=df.groupby("technique", sort=False).groups.keys(),
     )
-    ax.set_yticks(np.arange(-4, 11, 2))
-    ax.set_yticklabels(map(lambda n: f"{n:.2E}" if n > 1000 else f"{n}", 10.0 ** np.arange(-4, 11, 2)))
+    ax.set_yscale("symlog", linthresh=1)
+    ax.set_yticklabels([0, 1, 10, 100, 1000, 10000])
+
     ax.tick_params("x", rotation_mode="xtick")
-    ax.set_ylabel("Runtime (s) (log scale)")
+    ax.set_ylabel("Runtime (s, log scale)")
     ax.set_xlabel("Technique")
     if df["time"].between(0, 1).all():
         ax.set_ylim(-0.03, 1.03)
